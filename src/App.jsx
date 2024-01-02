@@ -90,7 +90,7 @@ const Scene = () => {
           <bufferAttribute attach='attributes-uv' count={uvs.length / 2} array={uvs} itemSize={2} />
           <bufferAttribute attach='index' count={indices.length} array={indices} itemSize={1} />
         </bufferGeometry>
-        <worldMaterial ref={worldMaterial} side={DoubleSide} wireframe />
+        <worldMaterial ref={worldMaterial} side={DoubleSide} />
         {/* <meshBasicMaterial color="red" side={DoubleSide} wireframe /> */}
         {/* <pointsMaterial color='red' size={0.1} /> */}
       </mesh>
