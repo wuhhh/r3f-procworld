@@ -71,6 +71,7 @@ const Scene = () => {
 	generateUVs();
 
   const vertices = new Float32Array(vertices_);
+	const normals = new Float32Array(normals_);
   const uvs = new Float32Array(uvs_);
   const indices = new Uint16Array(indices_);
 
@@ -83,6 +84,7 @@ const Scene = () => {
       <mesh>
         <bufferGeometry>
           <bufferAttribute attach='attributes-position' count={vertices.length / 3} array={vertices} itemSize={3} />
+					<bufferAttribute attach='attributes-normal' count={normals.length / 3} array={normals} itemSize={3} />
           <bufferAttribute attach='attributes-uv' count={uvs.length / 2} array={uvs} itemSize={2} />
           <bufferAttribute attach='index' count={indices.length} array={indices} itemSize={1} />
         </bufferGeometry>
