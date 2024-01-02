@@ -35,6 +35,8 @@ const Scene = () => {
       const y = Math.sin(theta) * radius;
       const z = (i / tubularSegments - 0.5) * depth;
       vertices_.push(x, y, z);
+			const normal = new Vector3(x, y, 0.0).normalize();
+			normals_.push(normal.x, normal.y, normal.z);
     }
   };
 
