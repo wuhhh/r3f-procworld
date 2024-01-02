@@ -8,7 +8,7 @@ import worldFragmentShader from "./shaders/world/frag.glsl";
 
 const WorldMaterial = shaderMaterial(
   {
-		uTime: 0,
+		uTime: Math.random() * 999,
 	},
   worldVertexShader,
 	worldFragmentShader
