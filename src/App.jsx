@@ -1,7 +1,7 @@
 import { useRef } from "react";
 import { Canvas, extend, useFrame } from "@react-three/fiber";
-import { OrbitControls, shaderMaterial } from "@react-three/drei";
-import { DoubleSide } from "three";
+import { Float, OrbitControls, PerspectiveCamera, shaderMaterial } from "@react-three/drei";
+import { DoubleSide, Vector3 } from "three";
 
 import worldVertexShader from "./shaders/world/vert.glsl";
 import worldFragmentShader from "./shaders/world/frag.glsl";
@@ -18,12 +18,13 @@ extend({ WorldMaterial });
 
 const Scene = () => {
 	const worldMaterial = useRef();
-  const radius = 1;
-  const depth = 4;
-  const radialSegments = 200;
-  const tubularSegments = 100;
+  const radius = 1.5;
+  const depth = 7;
+  const radialSegments = 128;
+  const tubularSegments = 128;
 
   const vertices_ = [];
+	const normals_ = [];
   const uvs_ = [];
   const indices_ = [];
 
@@ -101,7 +102,10 @@ const Scene = () => {
 
 const App = () => {
   return (
-    <Canvas camera={{ fov: 70, position: [0, 0, 3] }}>
+    <Canvas>
+			<Float>
+				<PerspectiveCamera makeDefault fov={70} position={[0, 0, 3]} />
+			</Float>
       <OrbitControls />
       <Scene />
     </Canvas>
