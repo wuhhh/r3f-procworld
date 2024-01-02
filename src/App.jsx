@@ -18,7 +18,7 @@ extend({ WorldMaterial });
 
 const Scene = () => {
 	const worldMaterial = useRef();
-  const radius = 1.5;
+  const radius = 1.0;
   const depth = 7;
   const radialSegments = 128;
   const tubularSegments = 128;

@@ -190,10 +190,11 @@ void main() {
 	vec4 noise = openSimplex2_ImproveXY(noisePos * .5);
 	// pos.xy += normal.xy * noise.w * 1.6;
 	// pos.z += noise.w * 0.25;
-	// pos.y = normal.y + pos.y + noise.y * 0.125;
+	pos.x = normal.x + pos.x + noise.x * 0.125;
+	pos.y = normal.y + pos.y + noise.y * 0.125;
 
 	// expand pos along normals 
-	pos += normal * 0.25;
+	// pos += normal * 2.25;
 
 	// Only for points
 	vec4 mvPosition = modelViewMatrix * vec4( pos, 1.0 );
