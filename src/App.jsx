@@ -41,8 +41,8 @@ const Scene = () => {
   };
 
   const generateUVs = () => {
-    for (let i = 0; i <= tubularSegments; i++) {
-      for (let j = 0; j <= radialSegments; j++) {
+    for (let i = 0; i < tubularSegments; i++) {
+      for (let j = 0; j < radialSegments; j++) {
         const u = j / radialSegments;
 				uvs_.push(u, 1.0 - i / tubularSegments);
       }
