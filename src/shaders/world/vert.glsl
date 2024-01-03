@@ -186,8 +186,8 @@ void main() {
 	// Perlin
 	// float noiseFreq = 0.5;
 	// float noiseAmp = 0.5;
-	// vec3 noisePos = vec3(pos.x, pos.y, pos.z - uTime);
-	// pos.xy += normal.xy * cnoise(noisePos) * noiseAmp;
+	// vec3 pnoisePos = vec3(pos.x, pos.y, pos.z - uTime * .8);
+	// pos.xy += normal.xy * cnoise(pnoisePos) * noiseAmp;
 
 	// OpenSimplex2
 	vec3 noisePos = vec3(pos.x, pos.y, pos.z - uTime * .8);
