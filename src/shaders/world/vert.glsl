@@ -1,3 +1,5 @@
+precision mediump float;
+
 uniform float uTime;
 varying vec2 vUv;
 
@@ -178,6 +180,9 @@ void main() {
 	vUv = uv;
 	vec3 pos = position;
 
+	// Twirl pos
+	// pos.xz += vec2(cos(uTime * 0.5), sin(uTime * 0.5)) * 0.5;
+
 	// Perlin
 	// float noiseFreq = 0.5;
 	// float noiseAmp = 0.5;
@@ -185,11 +190,15 @@ void main() {
 	// pos.xy += normal.xy * cnoise(noisePos) * noiseAmp;
 
 	// OpenSimplex2
-	vec3 noisePos = vec3(pos.x, pos.y, pos.z - uTime);
-	vec4 noiseLg = openSimplex2_Conventional(noisePos * .1);
-	vec4 noiseMd = openSimplex2_Conventional(noisePos * .05);
-	vec4 noiseSm = openSimplex2_Conventional(noisePos * .25);
-	pos.xy -= (1. - pow(vUv.y, 8.0)) * normal.xy * abs(noiseSm.w) * 0.5;
+	vec3 noisePos = vec3(pos.x, pos.y, pos.z - uTime * .8);
+	vec4 simplex1 = openSimplex2_Conventional(noisePos * .25);
+	pos.xy -= (1. - pow(vUv.y, 8.0)) * normal.xy * abs(simplex1.w) * 0.5;
+	vec4 simplex2 = openSimplex2_ImproveXY(vec3(pos.xy, 0.0) * 2.);
+	pos.xy -= (1. - pow(vUv.y, 8.0)) * normal.xy * abs(simplex2.w) * 0.08;
+
+	// Fan the near ring of points along their normals
+	// Prevents seeing the edges collapse near the camera
+	pos.xy += normal.xy * pow((1. - vUv.y), 16.0) * .5;
 
 	// expand pos along normals 
 	// pos += normal * 2.25;

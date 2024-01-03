@@ -17,10 +17,11 @@ const WorldMaterial = shaderMaterial(
 extend({ WorldMaterial });
 
 const Scene = () => {
+	const capsule = useRef();
 	const worldMaterial = useRef();
-  const radius = 1.5;
+  const radius = 2.0;
   const depth = 7;
-  const radialSegments = 128;
+  const radialSegments = 256;
   const tubularSegments = 128;
 
   const vertices_ = [];
@@ -80,11 +81,12 @@ const Scene = () => {
 
 	useFrame((_, delta) => {
 		worldMaterial.current.uniforms.uTime.value += delta;
+		capsule.current.rotation.z = Math.sin(_.clock.elapsedTime * 0.001) * Math.PI;
 	});
 
   return (
     <>
-      <mesh>
+      <mesh ref={capsule} position={[0, 1, 0]}>
         <bufferGeometry>
           <bufferAttribute attach='attributes-position' count={vertices.length / 3} array={vertices} itemSize={3} />
 					<bufferAttribute attach='attributes-normal' count={normals.length / 3} array={normals} itemSize={3} />
