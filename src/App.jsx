@@ -18,7 +18,7 @@ extend({ WorldMaterial });
 
 const Scene = () => {
 	const worldMaterial = useRef();
-  const radius = 1.0;
+  const radius = 1.5;
   const depth = 7;
   const radialSegments = 128;
   const tubularSegments = 128;
@@ -104,7 +104,7 @@ const App = () => {
   return (
     <Canvas>
 			<Float>
-				<PerspectiveCamera makeDefault fov={70} position={[0, 0, 3]} />
+				<PerspectiveCamera makeDefault fov={70} position={[0, 0, 4]} />
 			</Float>
       <OrbitControls />
       <Scene />

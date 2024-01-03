@@ -179,19 +179,17 @@ void main() {
 	vec3 pos = position;
 
 	// Perlin
-	/* float noiseFreq = 0.5;
-	float noiseAmp = 0.5;
-	vec3 noisePos = vec3(pos.x * noiseFreq + uTime, pos.y, pos.z);
-	pos.z += cnoise(noisePos) * noiseAmp; */
+	// float noiseFreq = 0.5;
+	// float noiseAmp = 0.5;
+	// vec3 noisePos = vec3(pos.x, pos.y, pos.z - uTime);
+	// pos.xy += normal.xy * cnoise(noisePos) * noiseAmp;
 
 	// OpenSimplex2
-  // Make it look like the noise is travelling in the Z direction
 	vec3 noisePos = vec3(pos.x, pos.y, pos.z - uTime);
-	vec4 noise = openSimplex2_ImproveXY(noisePos * .5);
-	// pos.xy += normal.xy * noise.w * 1.6;
-	// pos.z += noise.w * 0.25;
-	pos.x = normal.x + pos.x + noise.x * 0.125;
-	pos.y = normal.y + pos.y + noise.y * 0.125;
+	vec4 noiseLg = openSimplex2_Conventional(noisePos * .1);
+	vec4 noiseMd = openSimplex2_Conventional(noisePos * .05);
+	vec4 noiseSm = openSimplex2_Conventional(noisePos * .25);
+	pos.xy -= (1. - pow(vUv.y, 8.0)) * normal.xy * abs(noiseSm.w) * 0.5;
 
 	// expand pos along normals 
 	// pos += normal * 2.25;
@@ -201,5 +199,4 @@ void main() {
   gl_PointSize =  ( 10.0 / -mvPosition.z );
 
 	gl_Position = projectionMatrix * modelViewMatrix * vec4(pos, 1.);
-	// gl_Position = projectionMatrix * modelViewMatrix * vec4(position, 1.);
 }
