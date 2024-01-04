@@ -1,7 +1,9 @@
 import { useRef } from "react";
 import { Canvas, extend, useFrame } from "@react-three/fiber";
-import { Float, OrbitControls, PerspectiveCamera, shaderMaterial } from "@react-three/drei";
+import { Float, OrbitControls, PerspectiveCamera, shaderMaterial, useTexture } from "@react-three/drei";
 import { DoubleSide, Vector3 } from "three";
+
+import { Model } from "./components/Paperplane";
 
 import worldVertexShader from "./shaders/world/vert.glsl";
 import worldFragmentShader from "./shaders/world/frag.glsl";
@@ -16,7 +18,7 @@ const WorldMaterial = shaderMaterial(
 
 extend({ WorldMaterial });
 
-const Scene = () => {
+const Capsule = () => {
 	const capsule = useRef();
 	const worldMaterial = useRef();
   const radius = 2.0;
@@ -94,12 +96,40 @@ const Scene = () => {
           <bufferAttribute attach='index' count={indices.length} array={indices} itemSize={1} />
         </bufferGeometry>
         <worldMaterial ref={worldMaterial} side={DoubleSide} />
-        {/* <meshBasicMaterial color="red" side={DoubleSide} wireframe /> */}
-        {/* <pointsMaterial color='red' size={0.1} /> */}
       </mesh>
       <ambientLight />
     </>
   );
+};
+
+const Traveller = () => {
+	const t = useRef();
+	const matcap = useTexture("/textures/matcap-hot.png");
+
+	useFrame((state, delta) => {
+		const { x, y } = state.pointer;
+		const time = state.clock.elapsedTime;
+
+		// pitch (up/down)
+		t.current.rotation.x = Math.sin(time * .8) * Math.PI * .2;
+		t.current.position.y += t.current.rotation.x * .003;
+
+		// roll (left/right)
+		t.current.rotation.z = Math.sin(time * .8) * Math.PI * .1;
+		t.current.position.x -= t.current.rotation.z * .003;
+
+		// yaw (turn left/right)
+		t.current.rotation.y = t.current.rotation.z;
+
+		// fwd/bwd 
+		t.current.position.z += t.current.rotation.x * 0.005;
+	});
+
+	return (
+		<Model ref={t} scale={[0.05, 0.05, 0.05]} position={[0.5, -.2, 1]}>
+			<meshMatcapMaterial matcap={matcap} side={DoubleSide} />
+		</Model>
+	);
 };
 
 const App = () => {
@@ -109,7 +139,8 @@ const App = () => {
 				<PerspectiveCamera makeDefault fov={70} position={[0, 0, 4]} />
 			</Float>
       <OrbitControls />
-      <Scene />
+      <Capsule />
+			<Traveller />
     </Canvas>
   );
 };
