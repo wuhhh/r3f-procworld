@@ -178,34 +178,30 @@ float cnoise(vec3 P){
 void main() {
 	
 	vUv = uv;
+
 	vec3 pos = position;
+	vec3 travel = vec3(pos.x, pos.y, pos.z - uTime * .8);
 
-	// Twirl pos
-	// pos.xz += vec2(cos(uTime * 0.5), sin(uTime * 0.5)) * 0.5;
+	vec3 scape1 = pos;
+	vec3 scape2 = pos;
+	vec3 scape3 = pos;
 
-	// Perlin
-	// float noiseFreq = 0.5;
-	// float noiseAmp = 0.5;
-	// vec3 pnoisePos = vec3(pos.x, pos.y, pos.z - uTime * .8);
-	// pos.xy += normal.xy * cnoise(pnoisePos) * noiseAmp;
+	// Landscape 1
+	vec4 s1a = openSimplex2_Conventional(travel * .25);
+	scape1.xy -= (1. - pow(vUv.y, 8.0)) * normal.xy * abs(s1a.w) * 0.5;
+	vec4 s1b = openSimplex2_ImproveXY(vec3(scape1.xy * sin(uTime * .8 * .02 + vUv.y * 7. * .02) * 2., 0.0));
+	scape1.xy -= (1. - pow(vUv.y, 8.0)) * (sin(uTime * .8 + vUv.y * 7.0) * 0.5 + 0.5) * normal.xy * abs(s1b.w) * 0.16;
 
-	// OpenSimplex2
-	vec3 noisePos = vec3(pos.x, pos.y, pos.z - uTime * .8);
-	vec4 simplex1 = openSimplex2_Conventional(noisePos * .25);
-	pos.xy -= (1. - pow(vUv.y, 8.0)) * normal.xy * abs(simplex1.w) * 0.5;
-	vec4 simplex2 = openSimplex2_ImproveXY(vec3(pos.xy, 0.0) * 2.);
-	pos.xy -= (1. - pow(vUv.y, 8.0)) * normal.xy * abs(simplex2.w) * 0.08;
+	// Position post noise / mix
+	vec3 postPos = scape1;
 
 	// Fan the near ring of points along their normals
 	// Prevents seeing the edges collapse near the camera
-	pos.xy += normal.xy * pow((1. - vUv.y), 16.0) * .5;
-
-	// expand pos along normals 
-	// pos += normal * 2.25;
+	postPos.xy += normal.xy * pow((1. - vUv.y), 16.0) * .5;
 
 	// Only for points
-	vec4 mvPosition = modelViewMatrix * vec4( pos, 1.0 );
-  gl_PointSize =  ( 10.0 / -mvPosition.z );
+	// vec4 mvPosition = modelViewMatrix * vec4( pos, 1.0 );
+  // gl_PointSize =  ( 10.0 / -mvPosition.z );
 
-	gl_Position = projectionMatrix * modelViewMatrix * vec4(pos, 1.);
+	gl_Position = projectionMatrix * modelViewMatrix * vec4(postPos, 1.);
 }
