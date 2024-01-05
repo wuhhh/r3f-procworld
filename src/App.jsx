@@ -1,7 +1,7 @@
 import { useRef } from "react";
 import { Canvas, extend, useFrame } from "@react-three/fiber";
 import { Float, OrbitControls, PerspectiveCamera, shaderMaterial, useTexture } from "@react-three/drei";
-import { DoubleSide, Vector3 } from "three";
+import { Color, DoubleSide, Vector3 } from "three";
 import { useControls } from "leva";
 
 import { Model } from "./components/Paperplane";
@@ -181,6 +181,19 @@ const Traveller = () => {
 	);
 };
 
+const Beyond = (props) => {
+	const matcap = useTexture("/textures/matcap-tech.png");
+
+	const conf = useControls("beyond", {
+		planetColor: 'red'
+	});
+
+	return <mesh scale={[60, 60, 60]} position={[-3, 300, -1000]}>
+		<sphereGeometry />
+		<meshMatcapMaterial matcap={matcap} opacity={.1} transparent />
+	</mesh>
+}
+
 const App = () => {
   return (
     <Canvas>
@@ -189,6 +202,7 @@ const App = () => {
 			</Float>
       <OrbitControls />
       <Capsule />
+			<Beyond />
 			<Traveller />
     </Canvas>
   );
