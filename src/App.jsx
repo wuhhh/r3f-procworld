@@ -2,6 +2,7 @@ import { useRef } from "react";
 import { Canvas, extend, useFrame } from "@react-three/fiber";
 import { Float, OrbitControls, PerspectiveCamera, shaderMaterial, useTexture } from "@react-three/drei";
 import { DoubleSide, Vector3 } from "three";
+import { useControls } from "leva";
 
 import { Model } from "./components/Paperplane";
 
@@ -10,6 +11,13 @@ import worldFragmentShader from "./shaders/world/frag.glsl";
 
 const WorldMaterial = shaderMaterial(
   {
+		uDepth: .0,
+		uParam1: .0,
+		uParam2: .0,
+		uParam3: .0,
+		uParam4: .0,
+		uScapeMix: .0,
+		uRadius: .0,
 		uTime: Math.random() * 999,
 	},
   worldVertexShader,
@@ -25,6 +33,39 @@ const Capsule = () => {
   const depth = 7;
   const radialSegments = 256;
   const tubularSegments = 128;
+
+	const worldConf = useControls("world", {
+		scapeMix: {
+			value: 0.0,
+			min: 0.0,
+			max: 1.0,
+			step: 0.01,
+		},
+		uParam1: {
+			value: 0.0,
+			min: -10.0,
+			max: 10.0,
+			step: .1,
+		},
+		uParam2: {
+			value: 0.0,
+			min: -10.0,
+			max: 10.0,
+			step: .1,
+		},
+		uParam3: {
+			value: 0.0,
+			min: -10.0,
+			max: 10.0,
+			step: .1,
+		},
+		uParam4: {
+			value: 0.0,
+			min: -10.0,
+			max: 10.0,
+			step: .1,
+		},
+	});
 
   const vertices_ = [];
 	const normals_ = [];
@@ -95,7 +136,16 @@ const Capsule = () => {
           <bufferAttribute attach='attributes-uv' count={uvs.length / 2} array={uvs} itemSize={2} />
           <bufferAttribute attach='index' count={indices.length} array={indices} itemSize={1} />
         </bufferGeometry>
-        <worldMaterial ref={worldMaterial} side={DoubleSide} />
+        <worldMaterial 
+					ref={worldMaterial} 
+					side={DoubleSide} 
+					uDepth={depth} 
+					uParam1={worldConf.uParam1}
+					uParam2={worldConf.uParam2}
+					uParam3={worldConf.uParam3}
+					uParam4={worldConf.uParam4}
+					uScapeMix={worldConf.scapeMix} 
+					uRadius={radius} />
       </mesh>
     </>
   );
@@ -131,14 +181,6 @@ const Traveller = () => {
 	);
 };
 
-const Pyramid = (props) => {
-	return <mesh>
-		<coneGeometry args={[1, 2, 4, 1, true]}>
-			<meshBasicMaterial color="red" />
-		</coneGeometry>
-	</mesh>
-}
-
 const App = () => {
   return (
     <Canvas>
@@ -147,7 +189,6 @@ const App = () => {
 			</Float>
       <OrbitControls />
       <Capsule />
-			{/* <Pyramid /> */}
 			<Traveller />
     </Canvas>
   );

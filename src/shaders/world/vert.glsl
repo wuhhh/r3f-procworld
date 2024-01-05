@@ -1,5 +1,12 @@
 precision mediump float;
 
+uniform float uDepth;
+uniform float uParam1;
+uniform float uParam2;
+uniform float uParam3;
+uniform float uParam4;
+uniform float uScapeMix;
+uniform float uRadius;
 uniform float uTime;
 varying vec2 vUv;
 
@@ -180,20 +187,27 @@ void main() {
 	vUv = uv;
 
 	vec3 pos = position;
-	vec3 travel = vec3(pos.x, pos.y, pos.z - uTime * .8);
+	float speed = .8;
+	vec3 travel = vec3(pos.x, pos.y, pos.z - uTime * speed);
 
 	vec3 scape1 = pos;
 	vec3 scape2 = pos;
 	vec3 scape3 = pos;
 
+	// Range (make sure not to distort far end)
+	float range = 1. - pow(vUv.y, 8.0);
+
 	// Landscape 1
 	vec4 s1a = openSimplex2_Conventional(travel * .25);
-	scape1.xy -= (1. - pow(vUv.y, 8.0)) * normal.xy * abs(s1a.w) * 0.5;
-	vec4 s1b = openSimplex2_ImproveXY(vec3(scape1.xy * sin(uTime * .8 * .02 + vUv.y * 7. * .02) * 2., 0.0));
-	scape1.xy -= (1. - pow(vUv.y, 8.0)) * (sin(uTime * .8 + vUv.y * 7.0) * 0.5 + 0.5) * normal.xy * abs(s1b.w) * 0.16;
+	scape1.xy -= range * normal.xy * abs(s1a.w) * 0.5;
+	vec4 s1b = openSimplex2_ImproveXY(vec3(scape1.xy * sin(uTime * .8 * .02 + vUv.y * uDepth * .02) * 2., 0.0));
+	scape1.xy -= range * (sin(uTime * .8 + vUv.y * uDepth) * 0.5 + 0.5) * normal.xy * abs(s1b.w) * 0.16;
+
+	// Landscape 2
+	scape2.xy += range * normal.xy * smoothstep(-.1, 1.3, openSimplex2_Conventional(travel * .8).w);
 
 	// Position post noise / mix
-	vec3 postPos = scape1;
+	vec3 postPos = mix(scape1, scape2, .22);
 
 	// Fan the near ring of points along their normals
 	// Prevents seeing the edges collapse near the camera
