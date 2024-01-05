@@ -97,7 +97,6 @@ const Capsule = () => {
         </bufferGeometry>
         <worldMaterial ref={worldMaterial} side={DoubleSide} />
       </mesh>
-      <ambientLight />
     </>
   );
 };
@@ -132,14 +131,23 @@ const Traveller = () => {
 	);
 };
 
+const Pyramid = (props) => {
+	return <mesh>
+		<coneGeometry args={[1, 2, 4, 1, true]}>
+			<meshBasicMaterial color="red" />
+		</coneGeometry>
+	</mesh>
+}
+
 const App = () => {
   return (
     <Canvas>
 			<Float>
-				<PerspectiveCamera makeDefault fov={70} position={[0, 0, 4]} />
+				<PerspectiveCamera makeDefault fov={90} position={[0, 0, 3.9]} />
 			</Float>
       <OrbitControls />
       <Capsule />
+			{/* <Pyramid /> */}
 			<Traveller />
     </Canvas>
   );
