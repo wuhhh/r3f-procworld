@@ -197,7 +197,7 @@ void main() {
 
 	// Fan the near ring of points along their normals
 	// Prevents seeing the edges collapse near the camera
-	postPos.xy += normal.xy * pow((1. - vUv.y), 16.0) * .5;
+	postPos.xy += normal.xy * pow((1. - vUv.y), 8.0) * .7;
 
 	// Only for points
 	// vec4 mvPosition = modelViewMatrix * vec4( pos, 1.0 );
