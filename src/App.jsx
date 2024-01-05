@@ -10,6 +10,8 @@ import worldFragmentShader from "./shaders/world/frag.glsl";
 
 const WorldMaterial = shaderMaterial(
   {
+		uDepth: 1.0,
+		uRadius: 1.0,
 		uTime: Math.random() * 999,
 	},
   worldVertexShader,
@@ -83,19 +85,19 @@ const Capsule = () => {
 
 	useFrame((_, delta) => {
 		worldMaterial.current.uniforms.uTime.value += delta;
-		capsule.current.rotation.z = Math.sin(_.clock.elapsedTime * 0.001) * Math.PI;
+		// capsule.current.rotation.z = Math.sin(_.clock.elapsedTime * 0.001) * Math.PI;
 	});
 
   return (
     <>
-      <mesh ref={capsule} position={[0, 1, 0]}>
+      <mesh ref={capsule} position={[0, 0, 0]}>
         <bufferGeometry>
           <bufferAttribute attach='attributes-position' count={vertices.length / 3} array={vertices} itemSize={3} />
 					<bufferAttribute attach='attributes-normal' count={normals.length / 3} array={normals} itemSize={3} />
           <bufferAttribute attach='attributes-uv' count={uvs.length / 2} array={uvs} itemSize={2} />
           <bufferAttribute attach='index' count={indices.length} array={indices} itemSize={1} />
         </bufferGeometry>
-        <worldMaterial ref={worldMaterial} side={DoubleSide} />
+        <worldMaterial ref={worldMaterial} side={DoubleSide} uDepth={depth} uRadius={radius} />
       </mesh>
       <ambientLight />
     </>
@@ -136,7 +138,7 @@ const App = () => {
   return (
     <Canvas>
 			<Float>
-				<PerspectiveCamera makeDefault fov={70} position={[0, 0, 4]} />
+				<PerspectiveCamera makeDefault fov={70} position={[0, 0, 7]} />
 			</Float>
       <OrbitControls />
       <Capsule />

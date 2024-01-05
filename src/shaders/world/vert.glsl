@@ -1,7 +1,42 @@
 precision mediump float;
 
+uniform float uDepth;
+uniform float uRadius;
 uniform float uTime;
 varying vec2 vUv;
+
+vec2 opU(vec2 a, vec2 b) {
+	return mix(a, b, step(b.x, a.x));
+}
+
+float pyramid( vec3 p, float h) {
+	vec3 q=abs(p);
+	return max(-p.y, (q.x+q.y+q.z-h)/3.0 );
+}
+
+float terrain(vec3 p) {
+	return p.y - 0.1 - p.z*p.z*0.001 + p.x*atan(p.x)*0.035 + sin(p.x)*sin(p.z)*0.15 ;
+}
+
+vec2 map(vec3 p) {
+	
+	vec2 ret=vec2(pyramid(p,1.0),1.0);
+	ret=opU(ret, vec2(pyramid(p-vec3(-2.0,0.0,1.0),1.0),1.0) );
+	ret=opU(ret, vec2(pyramid(p-vec3(-0.75,0.0,2.5),1.0),1.0) );
+	ret=opU(ret, vec2(pyramid(p-vec3(1.5,0.0,1.5),1.5),1.0) );
+	ret=opU(ret, vec2(pyramid(p-vec3(0.2,0.0,-2.0),1.0),1.0) );
+	ret=opU(ret, vec2(pyramid(p-vec3(1.0,0.0,-4.0),1.0),1.0) );
+	ret=opU(ret, vec2(pyramid(p-vec3(-3.0,0.0,-6.0),1.0),1.0) );
+	ret=opU(ret, vec2(pyramid(p-vec3(-2.0,0.4,-8.0),1.0),1.0) );
+	ret=opU(ret, vec2(pyramid(p-vec3(2.0,-3.2,-10.0),1.0),1.0) );
+	ret=opU(ret, vec2(pyramid(p-vec3(0.4,1.2,-12.0),1.0),1.0) );
+	ret=opU(ret, vec2(pyramid(p-vec3(-1.3,4.2,-14.0),1.0),1.0) );
+	ret=opU(ret, vec2(pyramid(p-vec3(0.2,0.0,-16.0),1.0),1.0) );
+
+	ret=opU(ret, vec2( terrain(p), 2.0));
+	
+	return ret;
+}
 
 //////////////// K.jpg's Re-oriented 4-Point BCC Noise (OpenSimplex2) ////////////////
 ////////////////////// Output: vec4(dF/dx, dF/dy, dF/dz, value) //////////////////////
@@ -187,17 +222,23 @@ void main() {
 	vec3 scape3 = pos;
 
 	// Landscape 1
-	vec4 s1a = openSimplex2_Conventional(travel * .25);
-	scape1.xy -= (1. - pow(vUv.y, 8.0)) * normal.xy * abs(s1a.w) * 0.5;
-	vec4 s1b = openSimplex2_ImproveXY(vec3(scape1.xy * sin(uTime * .8 * .02 + vUv.y * 7. * .02) * 2., 0.0));
-	scape1.xy -= (1. - pow(vUv.y, 8.0)) * (sin(uTime * .8 + vUv.y * 7.0) * 0.5 + 0.5) * normal.xy * abs(s1b.w) * 0.16;
+	// vec4 s1a = openSimplex2_Conventional(travel * .25);
+	// scape1.xy -= (1. - pow(vUv.y, 8.0)) * normal.xy * abs(s1a.w) * 0.5;
+	// vec4 s1b = openSimplex2_ImproveXY(vec3(scape1.xy * sin(uTime * .8 * .02 + vUv.y * 7. * .02) * 2., 0.0));
+	// scape1.xy -= (1. - pow(vUv.y, 8.0)) * (sin(uTime * .8 + vUv.y * 7.0) * 0.5 + 0.5) * normal.xy * abs(s1b.w) * 0.16;
+
+	// Experimenting 
+	vec3 squarePos = position;
+	squarePos.x *= uDepth * uRadius;
+	squarePos.x *= .2;
+	scape1.xy += abs(-normal.xy * map(squarePos).x * 0.5);
 
 	// Position post noise / mix
 	vec3 postPos = scape1;
 
 	// Fan the near ring of points along their normals
 	// Prevents seeing the edges collapse near the camera
-	postPos.xy += normal.xy * pow((1. - vUv.y), 16.0) * .5;
+	// postPos.xy += normal.xy * pow((1. - vUv.y), 16.0) * .5;
 
 	// Only for points
 	// vec4 mvPosition = modelViewMatrix * vec4( pos, 1.0 );
