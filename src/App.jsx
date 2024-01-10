@@ -1,10 +1,11 @@
 import { useRef } from "react";
 import { Canvas, extend, useFrame } from "@react-three/fiber";
 import { Float, OrbitControls, PerspectiveCamera, shaderMaterial, useTexture } from "@react-three/drei";
-import { Color, DoubleSide, Vector3 } from "three";
+import { DoubleSide, Vector3 } from "three";
 import { useControls } from "leva";
 
 import { Model } from "./components/Paperplane";
+import Story from "./components/Story";
 
 import worldVertexShader from "./shaders/world/vert.glsl";
 import worldFragmentShader from "./shaders/world/frag.glsl";
@@ -31,7 +32,7 @@ const Capsule = () => {
 	const worldMaterial = useRef();
   const radius = 2.0;
   const depth = 7;
-  const radialSegments = 256;
+  const radialSegments = 128;
   const tubularSegments = 128;
 
 	const worldConf = useControls("world", {
@@ -43,26 +44,26 @@ const Capsule = () => {
 		},
 		uParam1: {
 			value: 0.0,
-			min: -10.0,
-			max: 10.0,
+			min: -32.0,
+			max: 32.0,
 			step: .1,
 		},
 		uParam2: {
 			value: 0.0,
-			min: -10.0,
-			max: 10.0,
+			min: -32.0,
+			max: 32.0,
 			step: .1,
 		},
 		uParam3: {
 			value: 0.0,
-			min: -10.0,
-			max: 10.0,
+			min: -32.0,
+			max: 32.0,
 			step: .1,
 		},
 		uParam4: {
 			value: 0.0,
-			min: -10.0,
-			max: 10.0,
+			min: -32.0,
+			max: 32.0,
 			step: .1,
 		},
 	});
@@ -88,7 +89,8 @@ const Capsule = () => {
   const generateUVs = () => {
     for (let i = 0; i < tubularSegments; i++) {
       for (let j = 0; j < radialSegments; j++) {
-        const u = j / radialSegments;
+        let u = j / radialSegments;
+				u = Math.abs(u * 2.0 - 1.0); // x uv from 0 to 1 to 0
 				uvs_.push(u, 1.0 - i / tubularSegments);
       }
     }
@@ -124,7 +126,7 @@ const Capsule = () => {
 
 	useFrame((_, delta) => {
 		worldMaterial.current.uniforms.uTime.value += delta;
-		capsule.current.rotation.z = Math.sin(_.clock.elapsedTime * 0.001) * Math.PI;
+		capsule.current.rotation.z = Math.PI * .5 + Math.sin(_.clock.elapsedTime * 0.001) * Math.PI;
 	});
 
   return (
@@ -145,7 +147,8 @@ const Capsule = () => {
 					uParam3={worldConf.uParam3}
 					uParam4={worldConf.uParam4}
 					uScapeMix={worldConf.scapeMix} 
-					uRadius={radius} />
+					uRadius={radius} 
+				/>
       </mesh>
     </>
   );
@@ -184,10 +187,6 @@ const Traveller = () => {
 const Beyond = (props) => {
 	const matcap = useTexture("/textures/matcap-tech.png");
 
-	const conf = useControls("beyond", {
-		planetColor: 'red'
-	});
-
 	return <mesh scale={[60, 60, 60]} position={[-3, 300, -1000]}>
 		<sphereGeometry />
 		<meshMatcapMaterial matcap={matcap} opacity={.1} transparent />
@@ -196,15 +195,18 @@ const Beyond = (props) => {
 
 const App = () => {
   return (
-    <Canvas>
-			<Float>
-				<PerspectiveCamera makeDefault fov={90} position={[0, 0, 3.9]} />
-			</Float>
-      <OrbitControls />
-      <Capsule />
-			<Beyond />
-			<Traveller />
-    </Canvas>
+		<>
+			<Canvas>
+				<Float>
+					<PerspectiveCamera makeDefault fov={90} position={[0, 0, 3.9]} />
+				</Float>
+				<OrbitControls />
+				<Capsule />
+				<Beyond />
+				<Traveller />
+			</Canvas>
+			<Story />
+		</>
   );
 };
 
