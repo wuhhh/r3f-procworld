@@ -49,7 +49,7 @@ export default function Story() {
 	}, []);
 
 	return (
-		<div className='absolute inset-0 flex items-end justify-center text-center'>
+		<div className='absolute inset-0 flex items-end justify-center text-center pointer-events-none'>
 			<div className='flex gap-x-1 font-mono text-white pb-16 opacity-70 leading-normal'>
 				<span ref={out} dangerouslySetInnerHTML={{ __html: line }}></span>
 				<span className='animate-blink'>&#x2588;</span>

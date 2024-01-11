@@ -49,4 +49,5 @@ void main() {
   // gl_PointSize =  ( 10.0 / -mvPosition.z );
 
 	gl_Position = projectionMatrix * modelViewMatrix * vec4(vec3(postPos), 1.);
+	// gl_Position = projectionMatrix * modelViewMatrix * vec4(vec3(position), 1.);
 }
