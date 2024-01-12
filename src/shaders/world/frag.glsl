@@ -24,11 +24,10 @@ void main() {
 	uv.y += uTime * speed;
 	vec3 base = vec3(vUv.y, .133, .2);
 	vec3 brighter = brightnessContrast(base, .2, 1.);
-	// float noise = pnoise(vec2(uv.x * 26.6, uv.y * 1.5), vec2(2.0)) * pnoise(vec2(uv.x * 32., uv.y * 2.9), vec2(-6.8, 5.8));
-	// float alpha = smoothstep(.05, .1, noise * uv.x);
-	float noise = psrdnoise(vec3(uv.x, uv.y, uTime * .2), vec3(xp, yp, 0.));
-	// noise *= psrdnoise(vec3(uv.x * 32., uv.y * 2.9, uTime * .05), vec3(1., 1., 256.));
-	float alpha = smoothstep(.53, .59, noise);
+	float noise = psrdnoise(vec3(uv.x, uv.y, uTime * .1), vec3(xp, yp, 0.));
+	float stepWidth = .06;
+	float stepStart = .63;
+	float alpha = smoothstep(stepStart, stepStart + stepWidth, noise);
 	vec3 blend = blendLighten(base, brighter, 1.);
 	gl_FragColor = mix(vec4(base, 1.0), vec4(blend, alpha), vLevel.y);
 }
