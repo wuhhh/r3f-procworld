@@ -3,18 +3,21 @@ precision mediump float;
 uniform float uDepth;
 uniform float uParam1;
 uniform float uParam2;
-uniform float uParam3;
-uniform float uParam4;
 uniform float uScapeMix;
 uniform float uRadius;
 uniform float uTime;
+
+attribute vec3 level;
+
 varying vec2 vUv;
+varying vec3 vLevel;
 
 #include "../lygia/generative/snoise.glsl"
 
 void main() {
 	
 	vUv = uv;
+	vLevel = level;
 
 	vec3 pos = position;
 	float speed = .8;

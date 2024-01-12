@@ -1,7 +1,7 @@
 import { useRef } from "react";
 import { Canvas, extend, useFrame } from "@react-three/fiber";
 import { Float, OrbitControls, PerspectiveCamera, shaderMaterial, useTexture } from "@react-three/drei";
-import { BackSide, Vector3 } from "three";
+import { BackSide, DoubleSide, Vector3 } from "three";
 import { Leva, useControls } from "leva";
 
 import { Model } from "./components/Paperplane";
@@ -172,7 +172,7 @@ const Capsule = () => {
 
 	// Generate vertices
   for (let i = 0; i < tubularSegments; i++) {
-    generateSegment(i, radius * .92, [0, 1, 0]);
+    generateSegment(i, radius * .9, [0, 1, 0]);
   }
 
 	// Generate the last row of vertices
