@@ -1,7 +1,7 @@
 import { useRef } from "react";
 import { Canvas, extend, useFrame } from "@react-three/fiber";
 import { Float, OrbitControls, PerspectiveCamera, shaderMaterial, useTexture } from "@react-three/drei";
-import { BackSide, DoubleSide, Vector3 } from "three";
+import { BackSide, Color, DoubleSide, Vector3 } from "three";
 import { Leva, useControls } from "leva";
 
 import { Model } from "./components/Paperplane";
@@ -12,6 +12,8 @@ import worldFragmentShader from "./shaders/world/frag.glsl";
 
 const WorldMaterial = shaderMaterial(
   {
+		uCapsuleColourFar: null,
+		uCapsuleColourNear: null,
 		uDepth: .0,
 		uParam1: .0,
 		uParam2: .0,
@@ -36,10 +38,12 @@ const Capsule = () => {
 	const worldMaterial = useRef();
   const radius = 2.0;
   const depth = 7;
-  const radialSegments = 128;
-  const tubularSegments = 128;
+  const radialSegments = 96;
+  const tubularSegments = 96;
 
 	const worldConf = useControls("world", {
+		uCapsuleColourFar: '#ff2233',
+		uCapsuleColourNear: '#002233',
 		scapeMix: {
 			value: 0.0,
 			min: 0.0,
@@ -209,6 +213,8 @@ const Capsule = () => {
 					ref={worldMaterial} 
 					side={BackSide} 
 					transparent
+					uCapsuleColourFar={new Color(worldConf.uCapsuleColourFar)}
+					uCapsuleColourNear={new Color(worldConf.uCapsuleColourNear)}
 					uDepth={depth} 
 					uParam1={worldConf.uParam1}
 					uParam2={worldConf.uParam2}
@@ -251,7 +257,7 @@ const Traveller = () => {
 	});
 
 	return (
-		<Model ref={t} scale={[0.05, 0.05, 0.05]} position={[0.5, -.2, 1]}>
+		<Model ref={t} scale={[0.08, 0.08, 0.08]} position={[0.5, -.2, 1]}>
 			<meshMatcapMaterial matcap={matcap} side={DoubleSide} />
 		</Model>
 	);
@@ -270,7 +276,7 @@ const App = () => {
   return (
 		<>
 			<Canvas>
-				{/* <Leva hidden /> */}
+				<Leva hidden />
 				<Float>
 					<PerspectiveCamera makeDefault fov={90} position={[0, 0, 3.9]} />
 				</Float>
