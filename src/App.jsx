@@ -1,7 +1,7 @@
 import { useRef } from "react";
 import { Canvas, extend, useFrame } from "@react-three/fiber";
 import { Float, OrbitControls, PerspectiveCamera, shaderMaterial, useTexture } from "@react-three/drei";
-import { DoubleSide, Vector3 } from "three";
+import { BackSide, Vector3 } from "three";
 import { Leva, useControls } from "leva";
 
 import { Model } from "./components/Paperplane";
@@ -17,6 +17,10 @@ const WorldMaterial = shaderMaterial(
 		uParam2: .0,
 		uParam3: .0,
 		uParam4: .0,
+		uParam5: .0,
+		uParam6: .0,
+		uParam7: .0,
+		uParam8: .0,
 		uScapeMix: .0,
 		uRadius: .0,
 		uTime: Math.random() * 999,
@@ -32,8 +36,8 @@ const Capsule = () => {
 	const worldMaterial = useRef();
   const radius = 2.0;
   const depth = 7;
-  const radialSegments = 64;
-  const tubularSegments = 64;
+  const radialSegments = 128;
+  const tubularSegments = 128;
 
 	const worldConf = useControls("world", {
 		scapeMix: {
@@ -66,21 +70,53 @@ const Capsule = () => {
 			max: 32.0,
 			step: .1,
 		},
+		uParam5: {
+			value: 0.0,
+			min: -32.0,
+			max: 32.0,
+			step: .1,
+		},
+		uParam6: {
+			value: 0.0,
+			min: -32.0,
+			max: 32.0,
+			step: .1,
+		},
+		uParam7: {
+			value: 0.0,
+			min: -32.0,
+			max: 32.0,
+			step: .1,
+		},
+		uParam8: {
+			value: 0.0,
+			min: -32.0,
+			max: 32.0,
+			step: .1,
+		},
 	});
 
   const vertices_ = [];
 	const normals_ = [];
+	const levels_ = [];
   const uvs_ = [];
   const indices_ = [];
 
-  const generateSegment = (i, r) => {
+	/**
+	 * Generate a segment of vertices
+	 * @param {Number} i - index
+	 * @param {Number} r - radius
+	 * @param {Number} l - level
+	 */
+  const generateSegment = (i, r, l) => {
     for (let j = 0; j < radialSegments; j++) {
-      const u = j / radialSegments;
+      const u = j / (radialSegments - 1);
       const theta = u * Math.PI * 2;
       const x = Math.cos(theta) * r;
       const y = Math.sin(theta) * r;
-      const z = (i / tubularSegments - 0.5) * depth;
+      const z = (i / (tubularSegments - 1) - 0.5) * depth;
       vertices_.push(x, y, z);
+			levels_.push(...l);
 			const normal = new Vector3(x, y, 0.0).normalize();
 			normals_.push(normal.x, normal.y, normal.z);
     }
@@ -89,12 +125,28 @@ const Capsule = () => {
   const generateUVs = () => {
     for (let i = 0; i < tubularSegments; i++) {
       for (let j = 0; j < radialSegments; j++) {
-        let u = j / radialSegments;
-				u = Math.abs(u * 2.0 - 1.0); // x uv from 0 to 1 to 0
-				uvs_.push(u, 1.0 - i / tubularSegments);
+        let u = j / (radialSegments - 1);
+				// u = Math.abs(u * 2.0 - 1.0); // x uv from 0 to 1 to 0
+				uvs_.push(u, 1.0 - i / (tubularSegments - 1));
       }
     }
   };
+
+	const generateIndices = (offset = 0) => {
+		for (let i = 0; i < tubularSegments - 1; i++) {
+			for (let j = 0; j < radialSegments; j++) {
+				const a = offset + i * radialSegments + j;
+				const b = offset + i * radialSegments + ((j + 1) % radialSegments);
+				const c = offset + (i + 1) * radialSegments + ((j + 1) % radialSegments);
+				const d = offset + (i + 1) * radialSegments + j;
+	
+				// console.log(a, b, c, d);
+	
+				indices_.push(a, b, c);
+				indices_.push(a, c, d);
+			}
+		}
+	}
 
 	/** 
 	 * FIRST PASS
@@ -102,61 +154,39 @@ const Capsule = () => {
 
 	// Generate vertices
   for (let i = 0; i < tubularSegments; i++) {
-    generateSegment(i, radius);
+    generateSegment(i, radius, [1, 0, 0]);
   }
 
 	// Generate the last row of vertices
-  // generateSegment(tubularSegments, radius);
+  // generateSegment(tubularSegments, radius, [1, 0, 0]);
+
+	// Generate UVs
+	generateUVs();
 
 	// Generate indices
-  for (let i = 0; i < tubularSegments - 1; i++) {
-    for (let j = 0; j < radialSegments; j++) {
-      const a = i * radialSegments + j;
-      const b = i * radialSegments + ((j + 1) % radialSegments);
-      const c = (i + 1) * radialSegments + ((j + 1) % radialSegments);
-      const d = (i + 1) * radialSegments + j;
-
-			console.log(a, b, c, d);
-
-      indices_.push(a, b, c);
-      indices_.push(a, c, d);
-    }
-  }
+  generateIndices(0);
 
 	/**
 	 * SECOND PASS
 	 */
 
-	const passOffset = radialSegments * tubularSegments;
-
 	// Generate vertices
   for (let i = 0; i < tubularSegments; i++) {
-    generateSegment(i, radius * .9);
+    generateSegment(i, radius * .92, [0, 1, 0]);
   }
 
 	// Generate the last row of vertices
-  // generateSegment(tubularSegments * 2, radius * .5);
-
-	// Generate indices
-  for (let i = 0; i < tubularSegments - 1; i++) {
-    for (let j = 0; j < radialSegments; j++) {
-      const a = passOffset + i * radialSegments + j;
-      const b = passOffset + i * radialSegments + ((j + 1) % radialSegments);
-      const c = passOffset + (i + 1) * radialSegments + ((j + 1) % radialSegments);
-      const d = passOffset + (i + 1) * radialSegments + j;
-
-			console.log(a, b, c, d);
-
-      indices_.push(a, b, c);
-      indices_.push(a, c, d);
-    }
-  }
+  // generateSegment(tubularSegments * 2, radius * .5, [0, 1, 0]);
 
 	// Generate UVs
 	generateUVs();
 
+  // Generate indices
+  generateIndices(radialSegments * tubularSegments);
+
   const vertices = new Float32Array(vertices_);
 	const normals = new Float32Array(normals_);
+	const levels = new Float32Array(levels_);
   const uvs = new Float32Array(uvs_);
   const indices = new Uint16Array(indices_);
 
@@ -171,20 +201,26 @@ const Capsule = () => {
         <bufferGeometry>
           <bufferAttribute attach='attributes-position' count={vertices.length / 3} array={vertices} itemSize={3} />
 					<bufferAttribute attach='attributes-normal' count={normals.length / 3} array={normals} itemSize={3} />
-          {/* <bufferAttribute attach='attributes-uv' count={uvs.length / 2} array={uvs} itemSize={2} /> */}
+					<bufferAttribute attach='attributes-level' count={levels.length / 3} array={levels} itemSize={3} />
+          <bufferAttribute attach='attributes-uv' count={uvs.length / 2} array={uvs} itemSize={2} />
           <bufferAttribute attach='index' count={indices.length} array={indices} itemSize={1} />
         </bufferGeometry>
         <worldMaterial 
 					ref={worldMaterial} 
-					side={DoubleSide} 
+					side={BackSide} 
+					transparent
 					uDepth={depth} 
 					uParam1={worldConf.uParam1}
 					uParam2={worldConf.uParam2}
 					uParam3={worldConf.uParam3}
 					uParam4={worldConf.uParam4}
+					uParam5={worldConf.uParam5}
+					uParam6={worldConf.uParam6}
+					uParam7={worldConf.uParam7}
+					uParam8={worldConf.uParam8}
 					uScapeMix={worldConf.scapeMix} 
 					uRadius={radius}
-					wireframe 
+					// wireframe 
 				/>
       </mesh>
     </>
@@ -234,7 +270,7 @@ const App = () => {
   return (
 		<>
 			<Canvas>
-				<Leva hidden />
+				{/* <Leva hidden /> */}
 				<Float>
 					<PerspectiveCamera makeDefault fov={90} position={[0, 0, 3.9]} />
 				</Float>
