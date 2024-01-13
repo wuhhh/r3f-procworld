@@ -242,11 +242,11 @@ const Traveller = () => {
 		const time = state.clock.elapsedTime;
 
 		// pitch (up/down)
-		t.current.rotation.x = Math.sin(time * .8) * Math.PI * .2;
+		t.current.rotation.x = Math.cos(time * .3) * Math.sin(time * .8) * Math.PI * .2;
 		t.current.position.y += t.current.rotation.x * .003;
 
 		// roll (left/right)
-		t.current.rotation.z = Math.sin(time * .8) * Math.PI * .1;
+		t.current.rotation.z = Math.cos(time * .2) * Math.sin(time * .8) * Math.PI * .1;
 		t.current.position.x -= t.current.rotation.z * .003;
 
 		// yaw (turn left/right)
@@ -276,7 +276,7 @@ const App = () => {
   return (
 		<>
 			<Canvas>
-				<Leva hidden />
+				{/* <Leva hidden /> */}
 				<Float>
 					<PerspectiveCamera makeDefault fov={90} position={[0, 0, 3.9]} />
 				</Float>
