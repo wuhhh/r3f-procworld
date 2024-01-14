@@ -42,8 +42,8 @@ const Capsule = () => {
   const tubularSegments = 96;
 
 	const worldConf = useControls("world", {
-		uCapsuleColourFar: '#ff2233',
-		uCapsuleColourNear: '#002233',
+		uCapsuleColourFar: '#ff4848',
+		uCapsuleColourNear: '#00416f',
 		scapeMix: {
 			value: 0.0,
 			min: 0.0,
@@ -52,14 +52,14 @@ const Capsule = () => {
 		},
 		uParam1: {
 			value: 0.0,
-			min: -32.0,
-			max: 32.0,
+			min: -1.0,
+			max: 1.0,
 			step: .1,
 		},
 		uParam2: {
 			value: 0.0,
-			min: -32.0,
-			max: 32.0,
+			min: -1.0,
+			max: 1.0,
 			step: .1,
 		},
 		uParam3: {
@@ -278,7 +278,7 @@ const App = () => {
 			<Canvas>
 				{/* <Leva hidden /> */}
 				<Float>
-					<PerspectiveCamera makeDefault fov={90} position={[0, 0, 3.9]} />
+					<PerspectiveCamera makeDefault fov={75} position={[0, 0, 3.9]} />
 				</Float>
 				<OrbitControls />
 				<Capsule />

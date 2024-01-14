@@ -9,8 +9,9 @@ uniform float uTime;
 
 attribute vec3 level;
 
-varying vec2 vUv;
+varying float vElevation;
 varying vec3 vLevel;
+varying vec2 vUv;
 
 #include "../lygia/generative/snoise.glsl"
 
@@ -50,6 +51,9 @@ void main() {
 	// Only for points
 	// vec4 mvPosition = modelViewMatrix * vec4( pos, 1.0 );
   // gl_PointSize =  ( 10.0 / -mvPosition.z );
+
+	// Elevation 
+	vElevation = distance(postPos.xy, position.xy);
 
 	gl_Position = projectionMatrix * modelViewMatrix * vec4(vec3(postPos), 1.);
 	// gl_Position = projectionMatrix * modelViewMatrix * vec4(vec3(position), 1.);

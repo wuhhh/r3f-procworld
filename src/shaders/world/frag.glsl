@@ -10,6 +10,7 @@ uniform float uParam5;
 uniform float uParam6;
 uniform float uParam7;
 uniform float uTime;
+varying float vElevation;
 varying vec3 vLevel;
 varying vec2 vUv;
 
@@ -17,6 +18,7 @@ varying vec2 vUv;
 #include "../lygia/color/blend/lighten.glsl"
 #include "../lygia/color/blend/screen.glsl"
 #include "../lygia/color/brightnessContrast.glsl"
+#include "../lygia/lighting/fresnel.glsl"
 
 void main() {
 	float speed = .45;
@@ -33,5 +35,7 @@ void main() {
 	alpha *= sin(vUv.x * 16.) * .5 + .5; // alpha variation around x
 	alpha *= 1. - pow(vUv.y, 4.0);
 	vec3 blend = blendLighten(base, brighter, 1.);
-	gl_FragColor = mix(vec4(base, 1.0), vec4(blend, alpha), vLevel.y); // capsule/cloud mix
+	vec4 postColour = mix(vec4(base, 1. - pow(vUv.y, 16.0)), vec4(blend, alpha), vLevel.y); // capsule/cloud mix
+	postColour = brightnessContrast(postColour, pow(vElevation, 2.0) * .25, 1.05);
+	gl_FragColor = postColour;
 } 
