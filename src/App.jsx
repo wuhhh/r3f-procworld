@@ -240,20 +240,21 @@ const Traveller = () => {
 	useFrame((state, delta) => {
 		const { x, y } = state.pointer;
 		const time = state.clock.elapsedTime;
+		const delta_ = Math.min(delta, 0.01); // clamp delta to 10ms
 
 		// pitch (up/down)
 		t.current.rotation.x = Math.cos(time * .3) * Math.sin(time * .8) * Math.PI * .2;
-		t.current.position.y += t.current.rotation.x * .003;
+		t.current.position.y += t.current.rotation.x * delta_ * .6;
 
 		// roll (left/right)
 		t.current.rotation.z = Math.cos(time * .2) * Math.sin(time * .8) * Math.PI * .1;
-		t.current.position.x -= t.current.rotation.z * .003;
+		t.current.position.x -= t.current.rotation.z * delta_ * .48;
 
 		// yaw (turn left/right)
 		t.current.rotation.y = t.current.rotation.z;
 
 		// fwd/bwd 
-		t.current.position.z += t.current.rotation.x * 0.005;
+		t.current.position.z += t.current.rotation.x * delta_ * 0.3;
 	});
 
 	return (
@@ -276,9 +277,9 @@ const App = () => {
   return (
 		<>
 			<Canvas>
-				{/* <Leva hidden /> */}
-				<Float>
-					<PerspectiveCamera makeDefault fov={75} position={[0, 0, 3.9]} />
+				<Leva hidden />
+				<Float speed={2.}>
+					<PerspectiveCamera makeDefault fov={90} position={[0, 0, 3.9]} />
 				</Float>
 				<OrbitControls />
 				<Capsule />
