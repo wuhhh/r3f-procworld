@@ -21,7 +21,7 @@ void main() {
 	vLevel = level;
 
 	vec3 pos = position;
-	float speed = .8;
+	float speed = 1.3;
 	vec3 travel = vec3(pos.x, pos.y, pos.z - uTime * speed);
 	// travel.z += (smoothstep(.5, 1., uv.x) * uv.y * 5.); // ceiling vortex
 
@@ -48,6 +48,9 @@ void main() {
 	// Prevents seeing the edges collapse near the camera
 	postPos.xy += normal.xy * pow((1. - vUv.y), 8.0) * .7;
 
+	// Bring the ring of points at far end in towards the centre
+	postPos.xy -= normal.xy * pow(vUv.y, 48.0) * .3;
+	
 	// Only for points
 	// vec4 mvPosition = modelViewMatrix * vec4( pos, 1.0 );
   // gl_PointSize =  ( 10.0 / -mvPosition.z );
