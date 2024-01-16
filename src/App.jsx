@@ -1,10 +1,10 @@
 import { useEffect, useRef, useState } from "react";
 import { Canvas, extend, useFrame } from "@react-three/fiber";
 import { Float, OrbitControls, PerspectiveCamera, shaderMaterial, useTexture } from "@react-three/drei";
-import { BackSide, Color, DoubleSide, MathUtils, Vector3 } from "three";
+import { AmbientLight, BackSide, Color, DoubleSide, MathUtils, Vector3 } from "three";
 import { Leva, useControls } from "leva";
 
-import { Model } from "./components/Paperplane";
+import { Model } from "./components/Spaceship";
 import Story from "./components/Story";
 
 import worldVertexShader from "./shaders/world/vert.glsl";
@@ -331,12 +331,12 @@ const Traveller = () => {
 		}
 
 		// Update rotation
-		t.current.rotation.x += pitchInertia * delta * .3;
-		t.current.rotation.z += rollInertia * delta * .03;
-		t.current.rotation.y += yawInertia * delta * 0.01;
+		t.current.rotation.x += pitchInertia * delta * .1;
+		t.current.rotation.z += rollInertia * delta * .01;
+		t.current.rotation.y += yawInertia * delta * 0.005;
 		
 		// Update position
-		t.current.position.y += t.current.rotation.x * delta * 1.2;
+		t.current.position.y += t.current.rotation.x * delta * 2.4;
 		t.current.position.x -= t.current.rotation.z * delta * 1.5;
 
 		// Automatic flight
@@ -356,7 +356,7 @@ const Traveller = () => {
   });
 
   return (
-    <Model ref={t} scale={[0.08, 0.08, 0.08]} position={[0.5, -0.2, 1]}>
+    <Model ref={t} scale={[0.05, 0.05, 0.05]} position={[0.5, -0.2, 2]}>
       <meshMatcapMaterial matcap={matcap} side={DoubleSide} />
     </Model>
   );
@@ -371,10 +371,10 @@ const Beyond = props => {
 
   return (
     <>
-      <mesh scale={[18, 20, 1]} position={[0, 1, -13]}>
+      {/* <mesh scale={[18, 20, 1]} position={[0, 1, -13]}>
         <planeGeometry args={[1, 1]} />
         <meshBasicMaterial color='black' />
-      </mesh>
+      </mesh> */}
       <mesh ref={planetBody} scale={[0.7, 0.7, 0.7]} position={[-2, 3, -10]}>
         <sphereGeometry args={[1, 32, 32]} />
         <shaderMaterial
@@ -396,7 +396,7 @@ const Beyond = props => {
 const App = () => {
   return (
     <>
-      <Canvas>
+      <Canvas flat linear>
         <Leva hidden />
         <Float speed={2}>
           <PerspectiveCamera makeDefault fov={90} position={[0, 0, 3.9]} />

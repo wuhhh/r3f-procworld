@@ -55,6 +55,9 @@ void main() {
 	// vec4 mvPosition = modelViewMatrix * vec4( pos, 1.0 );
   // gl_PointSize =  ( 10.0 / -mvPosition.z );
 
+	// Recalculate normal
+	// ...?
+
 	// Elevation 
 	vElevation = distance(postPos.xy, position.xy);
 
