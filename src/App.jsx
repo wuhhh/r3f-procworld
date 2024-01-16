@@ -333,11 +333,11 @@ const Traveller = () => {
 		// Update rotation
 		t.current.rotation.x += pitchInertia * delta * .3;
 		t.current.rotation.z += rollInertia * delta * .03;
-		t.current.rotation.y += yawInertia * delta * 0.02;
+		t.current.rotation.y += yawInertia * delta * 0.01;
 		
 		// Update position
 		t.current.position.y += t.current.rotation.x * delta * 1.2;
-		t.current.position.x -= t.current.rotation.z * delta * .7;
+		t.current.position.x -= t.current.rotation.z * delta * 1.5;
 
 		// Automatic flight
     // pitch (up/down)

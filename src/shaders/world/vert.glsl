@@ -21,7 +21,7 @@ void main() {
 	vLevel = level;
 
 	vec3 pos = position;
-	float speed = 1.3;
+	float speed = 2.3;
 	vec3 travel = vec3(pos.x, pos.y, pos.z - uTime * speed);
 	// travel.z += (smoothstep(.5, 1., uv.x) * uv.y * 5.); // ceiling vortex
 
