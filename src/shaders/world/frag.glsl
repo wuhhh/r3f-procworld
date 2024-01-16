@@ -16,9 +16,7 @@ varying vec2 vUv;
 
 #include "../lygia/generative/psrdnoise.glsl"
 #include "../lygia/color/blend/lighten.glsl"
-#include "../lygia/color/blend/screen.glsl"
 #include "../lygia/color/brightnessContrast.glsl"
-#include "../lygia/lighting/fresnel.glsl"
 
 void main() {
 	float speed = .45;
