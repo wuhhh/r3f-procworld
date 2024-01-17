@@ -278,6 +278,9 @@ const Traveller = () => {
 	const [yawInertia, setYawInertia] = useState(0);
 
   useFrame((state, delta) => {
+		// Clamp delta
+		delta = Math.min(delta, 0.1);
+
 		// Loop through keysDown and update position with inertia
 		if (keysDown.current.w) {
 			setPitchInertia(pitchInertia <= -50 ? -50 : pitchInertia - 0.1);
@@ -345,16 +348,20 @@ const Traveller = () => {
 const Beyond = props => {
   const planetBody = useRef();
 
+	const conf = useControls("beyond", {
+		spaceCanvasColour: "#ffbcbc",
+	})
+
   useFrame((state, delta) => {
     planetBody.current.material.uniforms.uTime.value += delta;
   });
 
   return (
     <>
-      {/* <mesh scale={[18, 20, 1]} position={[0, 1, -13]}>
+      <mesh scale={[18, 20, 1]} position={[0, 1, -13]}>
         <planeGeometry args={[1, 1]} />
-        <meshBasicMaterial color='black' />
-      </mesh> */}
+        <meshBasicMaterial color={conf.spaceCanvasColour} />
+      </mesh>
       <mesh ref={planetBody} scale={[0.7, 0.7, 0.7]} position={[-2, 3, -10]}>
         <sphereGeometry args={[1, 32, 32]} />
         <shaderMaterial
