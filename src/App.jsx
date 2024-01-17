@@ -1,7 +1,7 @@
 import { useEffect, useRef, useState } from "react";
 import { Canvas, extend, useFrame } from "@react-three/fiber";
 import { Float, OrbitControls, PerspectiveCamera, shaderMaterial, useTexture } from "@react-three/drei";
-import { AmbientLight, BackSide, Color, DoubleSide, MathUtils, Vector3 } from "three";
+import { BackSide, Color, DoubleSide, MathUtils, Vector3 } from "three";
 import { Leva, useControls } from "leva";
 
 import { Model } from "./components/Spaceship";
@@ -240,8 +240,6 @@ const Traveller = () => {
   const matcap = useTexture("/textures/matcap-hot.png");
 	const keysDown = useRef({ w: false, a: false, s: false, d: false });
 
-	console.log();
-
   useEffect(() => {
     window.addEventListener("keydown", e => {
       // Keyboard WASD and arrow keys using key codes
@@ -335,8 +333,6 @@ const Traveller = () => {
 
     // fwd/bwd
     // t.current.position.z += t.current.rotation.x * delta_ * 0.6;
-
-		console.log(keysDown.current);
   });
 
   return (
