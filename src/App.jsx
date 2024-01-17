@@ -238,50 +238,39 @@ const Capsule = () => {
 const Traveller = () => {
   const t = useRef();
   const matcap = useTexture("/textures/matcap-hot.png");
-	const [keysDown, setKeysDown] = useState({ w: false, a: false, s: false, d: false });
+	const keysDown = useRef({ w: false, a: false, s: false, d: false });
+
+	console.log();
 
   useEffect(() => {
     window.addEventListener("keydown", e => {
-      console.log(e);
       // Keyboard WASD and arrow keys using key codes
-      switch (e.code) {
-        case "KeyS":
-        case "ArrowDown":
-					setKeysDown({ ...keysDown, s: true });
-          break;
-        case "KeyW":
-        case "ArrowUp":
-					setKeysDown({ ...keysDown, w: true });
-          break;
-        case "KeyA":
-        case "ArrowLeft":
-					setKeysDown({ ...keysDown, a: true });
-          break;
-        case "KeyD":
-        case "ArrowRight":
-					setKeysDown({ ...keysDown, d: true });
-          break;
-      }
+      if(e.code === "KeyS" || e.code === "ArrowDown") {
+				keysDown.current.s = true;
+			}
+			if(e.code === "KeyW" || e.code === "ArrowUp") {
+				keysDown.current.w = true;
+			}
+			if(e.code === "KeyA" || e.code === "ArrowLeft") {
+				keysDown.current.a = true;
+			}
+			if(e.code === "KeyD" || e.code === "ArrowRight") {
+				keysDown.current.d = true;
+			}
     });
 
 		window.addEventListener("keyup", e => {
-			switch (e.code) {
-				case "KeyS":
-				case "ArrowDown":
-					setKeysDown({ ...keysDown, s: false });
-					break;
-				case "KeyW":
-				case "ArrowUp":
-					setKeysDown({ ...keysDown, w: false });
-					break;
-				case "KeyA":
-				case "ArrowLeft":
-					setKeysDown({ ...keysDown, a: false });
-					break;
-				case "KeyD":
-				case "ArrowRight":
-					setKeysDown({ ...keysDown, d: false });
-					break;
+			if(e.code === "KeyS" || e.code === "ArrowDown") {
+				keysDown.current.s = false;
+			}
+			if(e.code === "KeyW" || e.code === "ArrowUp") {
+				keysDown.current.w = false;
+			}
+			if(e.code === "KeyA" || e.code === "ArrowLeft") {
+				keysDown.current.a = false;
+			}
+			if(e.code === "KeyD" || e.code === "ArrowRight") {
+				keysDown.current.d = false;
 			}
 		});
   }, []);
@@ -292,38 +281,31 @@ const Traveller = () => {
 
   useFrame((state, delta) => {
 		// Loop through keysDown and update position with inertia
-		Object.keys(keysDown).forEach(key => {
-			if (keysDown[key]) {
-				switch (key) {
-					case "w":
-						// setUpInertia(upInertia + 1);
-						setPitchInertia(pitchInertia <= -50 ? -50 : pitchInertia - .1);
-						break;
-					case "s":
-						// setDownInertia(downInertia + 1);
-						setPitchInertia(pitchInertia >= 50 ? 50 : pitchInertia + .1);
-						break;
-					case "a":
-						// setLeftInertia(leftInertia + 1);
-						setRollInertia(rollInertia >= 35 ? 35 : rollInertia + 1);
-						setYawInertia(yawInertia >= 35 ? 35 : yawInertia + 1);
-						break;
-					case "d":
-						// setRightInertia(rightInertia + 1);
-						setRollInertia(rollInertia <= -35 ? -35 : rollInertia - 1);
-						setYawInertia(yawInertia <= -35 ? -35 : yawInertia - 1);
-						break;
-				}
-			}
-		});
+		if (keysDown.current.w) {
+			setPitchInertia(pitchInertia <= -50 ? -50 : pitchInertia - 0.1);
+		}
+
+		if (keysDown.current.s) {
+			setPitchInertia(pitchInertia >= 50 ? 50 : pitchInertia + 0.1);
+		}
+
+		if (keysDown.current.a) {
+			setRollInertia(rollInertia >= 35 ? 35 : rollInertia + 1);
+			setYawInertia(yawInertia >= 35 ? 35 : yawInertia + 1);
+		}
+
+		if (keysDown.current.d) {
+			setRollInertia(rollInertia <= -35 ? -35 : rollInertia - 1);
+			setYawInertia(yawInertia <= -35 ? -35 : yawInertia - 1);
+		}
 	
 		// Self-righting
-		if(!keysDown.w && !keysDown.s) {
+		if(!keysDown.current.w && !keysDown.current.s) {
 			setPitchInertia(MathUtils.lerp(pitchInertia, 0, delta * 1.1));
 			t.current.rotation.x = MathUtils.lerp(t.current.rotation.x, 0, delta * 1.1);
 		}
 
-		if(!keysDown.a && !keysDown.d) {
+		if(!keysDown.current.a && !keysDown.current.d) {
 			setRollInertia(MathUtils.lerp(rollInertia, 0, delta * 1.1));
 			setYawInertia(MathUtils.lerp(yawInertia, 0, delta * 1.1));
 			t.current.rotation.z = MathUtils.lerp(t.current.rotation.z, 0, delta * 1.1);
@@ -353,6 +335,8 @@ const Traveller = () => {
 
     // fwd/bwd
     // t.current.position.z += t.current.rotation.x * delta_ * 0.6;
+
+		console.log(keysDown.current);
   });
 
   return (
@@ -397,7 +381,7 @@ const App = () => {
   return (
     <>
       <Canvas flat linear>
-        <Leva hidden />
+        {/* <Leva hidden /> */}
         <Float speed={2}>
           <PerspectiveCamera makeDefault fov={90} position={[0, 0, 3.9]} />
         </Float>
