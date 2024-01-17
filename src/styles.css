@@ -31,3 +31,7 @@ body {
   color: black;
   -webkit-font-smoothing: antialiased;
 }
+
+.logomark {
+  @apply absolute bottom-[26px] left-[26px] w-[26px] h-[26px];
+}

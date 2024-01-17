@@ -4,6 +4,7 @@ import { Float, OrbitControls, PerspectiveCamera, shaderMaterial, useTexture } f
 import { BackSide, Color, DoubleSide, MathUtils, Vector3 } from "three";
 import { Leva, useControls } from "leva";
 
+import LogoMark from './components/LogoMark';
 import { Model } from "./components/Spaceship";
 import Story from "./components/Story";
 
@@ -11,6 +12,10 @@ import worldVertexShader from "./shaders/world/vert.glsl";
 import worldFragmentShader from "./shaders/world/frag.glsl";
 import planetBodyVertexShader from "./shaders/planetBody/vert.glsl";
 import planetBodyFragmentShader from "./shaders/planetBody/frag.glsl";
+import spaceCanvasVertexShader from "./shaders/spaceCanvas/vert.glsl";
+import spaceCanvasFragmentShader from "./shaders/spaceCanvas/frag.glsl";
+
+const disableMotion = false;
 
 const WorldMaterial = shaderMaterial(
   {
@@ -197,8 +202,8 @@ const Capsule = () => {
   const indices = new Uint16Array(indices_);
 
   useFrame((_, delta) => {
-    worldMaterial.current.uniforms.uTime.value += delta;
-    capsule.current.rotation.z = Math.PI * 0.5 + Math.sin(_.clock.elapsedTime * 0.001) * Math.PI;
+    worldMaterial.current.uniforms.uTime.value += delta * (disableMotion ? 0 : 1);
+    capsule.current.rotation.z = Math.PI * 0.5 + Math.sin(_.clock.elapsedTime * 0.001) * Math.PI * (disableMotion ? 0 : 0.1);
   });
 
   return (
@@ -322,6 +327,9 @@ const Traveller = () => {
 		t.current.position.y += t.current.rotation.x * delta * 2.4;
 		t.current.position.x -= t.current.rotation.z * delta * 1.5;
 
+		// Move forwards and backwards automatically
+		// t.current.position.z += Math.sin(state.clock.elapsedTime * 0.5) * delta * .1;
+
 		// Automatic flight
     // pitch (up/down)
     // t.current.rotation.x = Math.cos(time * .3) * Math.sin(time * .8) * Math.PI * .2;
@@ -347,20 +355,44 @@ const Traveller = () => {
 
 const Beyond = props => {
   const planetBody = useRef();
+	const spaceCanvas = useRef();
 
 	const conf = useControls("beyond", {
 		spaceCanvasColour: "#ffbcbc",
+		spaceCanvasColour1: "#ffc2c2",
+		spaceCanvasColour2: "#00416f",
+		spaceCanvasColour3: "#90e010",
 	})
 
   useFrame((state, delta) => {
     planetBody.current.material.uniforms.uTime.value += delta;
+		spaceCanvas.current.material.uniforms.uTime.value += delta;
   });
+
+	const SpaceCanvasMaterial = shaderMaterial(
+		{ 
+			uColor: new Color(conf.spaceCanvasColour),
+			uColor1: new Color(conf.spaceCanvasColour1),
+			uColor2: new Color(conf.spaceCanvasColour2),
+			uColor3: new Color(conf.spaceCanvasColour3),
+			uTime: Math.random() * 999,
+		},
+		`
+			varying vec2 vUv;
+			void main() {
+				vUv = uv;
+				gl_Position = projectionMatrix * modelViewMatrix * vec4(position, 1.0);
+			}
+		`,
+		spaceCanvasFragmentShader
+	);
+
+	const spaceCanvasMaterial = new SpaceCanvasMaterial();
 
   return (
     <>
-      <mesh scale={[18, 20, 1]} position={[0, 1, -13]}>
+      <mesh ref={spaceCanvas} scale={[18, 20, 1]} position={[0, 1, -13]} material={spaceCanvasMaterial}>
         <planeGeometry args={[1, 1]} />
-        <meshBasicMaterial color={conf.spaceCanvasColour} />
       </mesh>
       <mesh ref={planetBody} scale={[0.7, 0.7, 0.7]} position={[-2, 3, -10]}>
         <sphereGeometry args={[1, 32, 32]} />
@@ -384,8 +416,8 @@ const App = () => {
   return (
     <>
       <Canvas flat linear>
-        {/* <Leva hidden /> */}
-        <Float speed={2}>
+        <Leva hidden />
+        <Float speed={disableMotion ? 0 : 2}>
           <PerspectiveCamera makeDefault fov={90} position={[0, 0, 3.9]} />
         </Float>
         <OrbitControls />
@@ -393,6 +425,7 @@ const App = () => {
         <Beyond />
         <Traveller />
       </Canvas>
+			<LogoMark />
       <Story />
     </>
   );
