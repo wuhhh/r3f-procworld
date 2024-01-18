@@ -10,6 +10,12 @@ varying float vElevation;
 varying vec3 vLevel;
 varying vec2 vUv;
 
+// vLevel.x : 1.0 debris (planes)
+// vLevel.x : 0.0 terrain and clouds
+
+// vLevel.y : 0.0 terrain
+// vLevel.y : 1.0 clouds
+
 #include "../lygia/generative/snoise.glsl"
 
 void main() {
@@ -31,22 +37,22 @@ void main() {
 
 	// Landscape 1
 	vec3 s1a = snoise3(travel * .25);
-	scape1.xy -= range * normal.xy * abs(s1a.z) * .6;
+	scape1.xy += range * normal.xy * abs(s1a.z) * .6;
 	vec3 s1b = snoise3(vec3(scape1.xy * sin(uTime * .8 * .02 + vUv.y * uDepth * .02) * 2., 0.0));
-	scape1.xy -= range * (sin(uTime * .8 + vUv.y * uDepth) * 0.5 + 0.5) * normal.xy * abs(s1b.z) * 0.16;
+	scape1.xy += range * (sin(uTime * .8 + vUv.y * uDepth) * 0.5 + 0.5) * normal.xy * abs(s1b.z) * 0.16;
 
 	// Landscape 2
-	scape2.xy += range * normal.xy * smoothstep(-.1, 1.3, snoise3(travel * .8).z);
+	scape2.xy -= range * normal.xy * smoothstep(-.1, 1.3, snoise3(travel * .8).z);
 
 	// Position post noise / mix
 	vec3 postPos = mix(scape1, scape2, .22);
 
 	// Fan the near ring of points along their normals
 	// Prevents seeing the edges collapse near the camera
-	postPos.xy += normal.xy * pow((1. - vUv.y), 8.0) * .7;
+	postPos.xy -= normal.xy * pow((1. - vUv.y), 8.0) * .7;
 
 	// Bring the ring of points at far end in towards the centre
-	postPos.xy -= normal.xy * pow(vUv.y, 48.0) * .3;
+	postPos.xy += normal.xy * pow(vUv.y, 48.0) * .3;
 	
 	// Only for points
 	// vec4 mvPosition = modelViewMatrix * vec4( pos, 1.0 );
@@ -55,9 +61,13 @@ void main() {
 	// Recalculate normal
 	// ...?
 
+	// Debris test 
+	vec3 debrisPos = position;
+	vec3 debrisTravel = vec3(debrisPos.x, debrisPos.y, mod(uTime * speed, uDepth * 2.) - uDepth) * vLevel.x;
+
 	// Elevation 
 	vElevation = distance(postPos.xy, position.xy);
 
-	gl_Position = projectionMatrix * modelViewMatrix * vec4(vec3(postPos), 1.);
+	gl_Position = projectionMatrix * modelViewMatrix * vec4(mix(vec3(postPos), vec3(debrisTravel), vLevel.x), 1.);
 	// gl_Position = projectionMatrix * modelViewMatrix * vec4(vec3(position), 1.);
 }

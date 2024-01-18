@@ -1,7 +1,7 @@
 import { useEffect, useMemo, useRef, useState } from "react";
 import { Canvas, extend, useFrame } from "@react-three/fiber";
-import { Float, OrbitControls, PerspectiveCamera, shaderMaterial, useTexture } from "@react-three/drei";
-import { BackSide, Color, DoubleSide, Euler, MathUtils, Quaternion, Vector3 } from "three";
+import { Float, OrbitControls, PerspectiveCamera, shaderMaterial } from "@react-three/drei";
+import { Color, Euler, MathUtils, PlaneGeometry, Quaternion, Vector3 } from "three";
 import { Leva, useControls } from "leva";
 
 import LogoMark from "./components/LogoMark";
@@ -24,7 +24,8 @@ const WorldMaterial = shaderMaterial(
     uCapsuleColourNear: null,
     uDepth: 0.0,
     uRadius: 0.0,
-    uTime: Math.random() * 999,
+		uTime: 0.0,
+    // uTime: Math.random() * 999,
   },
   worldVertexShader,
   worldFragmentShader
@@ -57,7 +58,7 @@ const Capsule = () => {
    * @param {Number} r - radius
    * @param {Number} l - level
    */
-  const generateSegment = (i, r, l) => {
+  const generateTubeSegment = (i, r, l) => {
     for (let j = 0; j < radialSegments; j++) {
       const u = j / (radialSegments - 1);
       const theta = u * Math.PI * 2;
@@ -66,7 +67,7 @@ const Capsule = () => {
       const z = (i / (tubularSegments - 1) - 0.5) * depth;
       vertices_.push(x, y, z);
       levels_.push(...l);
-      const normal = new Vector3(x, y, 0.0).normalize();
+      const normal = new Vector3(x, y, 0.0).normalize().multiplyScalar(-1);
       normals_.push(normal.x, normal.y, normal.z);
     }
   };
@@ -74,11 +75,10 @@ const Capsule = () => {
 	/**
 	 * Generate UVs
 	 */
-  const generateUVs = () => {
+  const generateTubeUVs = () => {
     for (let i = 0; i < tubularSegments; i++) {
       for (let j = 0; j < radialSegments; j++) {
         let u = j / (radialSegments - 1);
-        // u = Math.abs(u * 2.0 - 1.0); // x uv from 0 to 1 to 0
         uvs_.push(u, 1.0 - i / (tubularSegments - 1));
       }
     }
@@ -87,7 +87,7 @@ const Capsule = () => {
 	/**
 	 * Generate indices
 	 */
-  const generateIndices = (offset = 0) => {
+  const generateTubeIndices = (offset = 0) => {
     for (let i = 0; i < tubularSegments - 1; i++) {
       for (let j = 0; j < radialSegments; j++) {
         const a = offset + i * radialSegments + j;
@@ -95,51 +95,91 @@ const Capsule = () => {
         const c = offset + (i + 1) * radialSegments + ((j + 1) % radialSegments);
         const d = offset + (i + 1) * radialSegments + j;
 
-        // console.log(a, b, c, d);
+				// Original winding order
+        // indices_.push(a, b, c);
+        // indices_.push(a, c, d);
 
-        indices_.push(a, b, c);
-        indices_.push(a, c, d);
+				// Reverse the order of vertices to invert the winding order
+				// This changes the winding order from counter-clockwise to clockwise
+				indices_.push(a, c, b);  // Inverted triangle (across diagonal)
+				indices_.push(a, d, c);  // Original triangle (across diagonal)
       }
     }
   };
 
+	/**
+	 * Generate plane [the easy way :D]
+	 */
+	const generatePlane = (w, h, position = new Vector3) => {
+		const plane = new PlaneGeometry(w, h);
+		const planeVertices = plane.attributes.position.array;
+		const planeNormals = plane.attributes.normal.array;
+		const planeUvs = plane.attributes.uv.array;
+
+		// Fill plane levels with [1, 0, 0]
+		const planeLevels = [];
+		for (let i = 0; i < planeVertices.length; i++) {
+			planeLevels.push(1, 0, 0);
+		}
+
+		// Generate plane indices from position array
+		const planeIndices = [];
+		const icosaOffset = (radialSegments * tubularSegments) * 2;
+		for (let i = 0; i < planeVertices.length / 3 / 2 / 2; i++) {
+			console.log(i);
+			const a = icosaOffset + i;
+			const b = icosaOffset + i + 1;
+			const c = icosaOffset + i + 2;
+			const d = icosaOffset + i + 3;
+			planeIndices.push(c, b, a);
+			planeIndices.push(c, d, b);
+		}
+
+		vertices_.push(...planeVertices);
+		normals_.push(...planeNormals);
+		levels_.push(...planeLevels);
+		uvs_.push(...planeUvs);
+		indices_.push(...planeIndices);
+	};
+
 	// Generate the capsule [the hard way :D]
 	const { vertices, normals, levels, uvs, indices } = useMemo(() => {
 		/**
-		 * FIRST PASS
+		 * FIRST PASS : Outer layer / capsule terrain
 		 */
 
 		// Generate vertices
 		for (let i = 0; i < tubularSegments; i++) {
-			generateSegment(i, radius, [1, 0, 0]);
+			generateTubeSegment(i, radius, [0, 0, 0]);
 		}
 
-		// Generate the last row of vertices
-		// generateSegment(tubularSegments, radius, [1, 0, 0]);
-
 		// Generate UVs
-		generateUVs();
+		generateTubeUVs();
 
 		// Generate indices
-		generateIndices(0);
+		generateTubeIndices(0);
 
 		/**
-		 * SECOND PASS
+		 * SECOND PASS : Cloud layer
 		 */
 
 		// Generate vertices
 		for (let i = 0; i < tubularSegments; i++) {
-			generateSegment(i, radius * 0.9, [0, 1, 0]);
+			generateTubeSegment(i, radius * 0.9, [0, 1, 0]);
 		}
 
-		// Generate the last row of vertices
-		// generateSegment(tubularSegments * 2, radius * .5, [0, 1, 0]);
-
 		// Generate UVs
-		generateUVs();
+		generateTubeUVs();
 
 		// Generate indices
-		generateIndices(radialSegments * tubularSegments);
+		generateTubeIndices(radialSegments * tubularSegments);
+
+		/**
+		 * THIRD PASS : Debris layer
+		 */
+
+		// Generate a plane 
+		generatePlane(.1, .1, new Vector3(0, 0, 0));
 
 		const vertices = new Float32Array(vertices_);
 		const normals = new Float32Array(normals_);
@@ -168,7 +208,6 @@ const Capsule = () => {
         </bufferGeometry>
         <worldMaterial
           ref={worldMaterial}
-          side={BackSide}
           transparent
           uCapsuleColourFar={new Color(worldConf.uCapsuleColourFar)}
           uCapsuleColourNear={new Color(worldConf.uCapsuleColourNear)}
@@ -225,8 +264,6 @@ const Traveller = () => {
   useFrame((state, delta) => {
     // Clamp delta
     delta = Math.min(delta, 0.1);
-
-		console.log(delta);
 
     // Loop through keysDown and update position with inertia
     if (keysDown.current.w) {

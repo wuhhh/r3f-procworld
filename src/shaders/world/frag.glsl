@@ -7,6 +7,8 @@ varying float vElevation;
 varying vec3 vLevel;
 varying vec2 vUv;
 
+// vLevel.y 0 = capsule, 1 = cloud
+
 #include "../lygia/generative/psrdnoise.glsl"
 #include "../lygia/color/blend/lighten.glsl"
 #include "../lygia/color/brightnessContrast.glsl"
@@ -29,4 +31,5 @@ void main() {
 	vec4 postColour = mix(vec4(base, 1. - pow(vUv.y, 16.0)), vec4(blend, alpha), vLevel.y); // capsule/cloud mix
 	postColour = brightnessContrast(postColour, pow(vElevation, 2.0) * .25, 1.05);
 	gl_FragColor = postColour;
+	// gl_FragColor = vec4(vUv.x, vUv.y, 0., 1.);
 } 
