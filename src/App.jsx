@@ -126,7 +126,6 @@ const Capsule = () => {
 		const planeIndices = [];
 		const icosaOffset = (radialSegments * tubularSegments) * 2;
 		for (let i = 0; i < planeVertices.length / 3 / 2 / 2; i++) {
-			console.log(i);
 			const a = icosaOffset + i;
 			const b = icosaOffset + i + 1;
 			const c = icosaOffset + i + 2;
@@ -395,6 +394,7 @@ const App = () => {
   return (
     <>
       <Canvas flat linear>
+				<fog attach="fog" color="hotpink" near={1} far={10} />
         <Leva hidden />
         <Float speed={disableMotion ? 0 : 2}>
           <PerspectiveCamera makeDefault fov={90} position={[0, 0, 3.9]} />
