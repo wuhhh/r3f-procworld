@@ -183,7 +183,6 @@ const Capsule = () => {
 
 const Traveller = () => {
   const t = useRef();
-  const matcap = useTexture("/textures/matcap-hot.png");
   const keysDown = useRef({ w: false, a: false, s: false, d: false });
 
   useEffect(() => {
@@ -227,23 +226,25 @@ const Traveller = () => {
     // Clamp delta
     delta = Math.min(delta, 0.1);
 
+		console.log(delta);
+
     // Loop through keysDown and update position with inertia
     if (keysDown.current.w) {
-      setPitchInertia(pitchInertia <= -50 ? -50 : pitchInertia - 0.1);
+      setPitchInertia(pitchInertia <= -50 ? -50 : pitchInertia - delta * 10);
     }
 
     if (keysDown.current.s) {
-      setPitchInertia(pitchInertia >= 50 ? 50 : pitchInertia + 0.1);
+      setPitchInertia(pitchInertia >= 50 ? 50 : pitchInertia + delta * 10);
     }
 
     if (keysDown.current.a) {
-      setRollInertia(rollInertia >= 35 ? 35 : rollInertia + 1);
-      setYawInertia(yawInertia >= 35 ? 35 : yawInertia + 1);
+      setRollInertia(rollInertia >= 35 ? 35 : rollInertia + delta * 100);
+      setYawInertia(yawInertia >= 35 ? 35 : yawInertia + delta * 100);
     }
 
     if (keysDown.current.d) {
-      setRollInertia(rollInertia <= -35 ? -35 : rollInertia - 1);
-      setYawInertia(yawInertia <= -35 ? -35 : yawInertia - 1);
+      setRollInertia(rollInertia <= -35 ? -35 : rollInertia - delta * 100);
+      setYawInertia(yawInertia <= -35 ? -35 : yawInertia - delta * 100);
     }
 
     // Self-righting
@@ -290,9 +291,7 @@ const Traveller = () => {
   });
 
   return (
-    <Model ref={t} scale={[0.05, 0.05, 0.05]} position={[0.5, -0.2, 2]}>
-      <meshMatcapMaterial matcap={matcap} side={DoubleSide} />
-    </Model>
+    <Model ref={t} scale={[0.05, 0.05, 0.05]} position={[0.5, -0.2, 2]} />
   );
 };
 
@@ -366,7 +365,7 @@ const App = () => {
         <OrbitControls />
         <Capsule />
         <Beyond />
-        {/* <Traveller /> */}
+        <Traveller />
       </Canvas>
       <LogoMark />
       {/* <Story /> */}
