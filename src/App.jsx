@@ -1,10 +1,10 @@
 import { useEffect, useRef, useState } from "react";
 import { Canvas, extend, useFrame } from "@react-three/fiber";
 import { Float, OrbitControls, PerspectiveCamera, shaderMaterial, useTexture } from "@react-three/drei";
-import { BackSide, Color, DoubleSide, MathUtils, Vector3 } from "three";
+import { BackSide, Color, DoubleSide, Euler, MathUtils, Quaternion, Vector3 } from "three";
 import { Leva, useControls } from "leva";
 
-import LogoMark from './components/LogoMark';
+import LogoMark from "./components/LogoMark";
 import { Model } from "./components/Spaceship";
 import Story from "./components/Story";
 
@@ -16,6 +16,7 @@ import spaceCanvasVertexShader from "./shaders/spaceCanvas/vert.glsl";
 import spaceCanvasFragmentShader from "./shaders/spaceCanvas/frag.glsl";
 
 const disableMotion = false;
+const tQ = new Quaternion();
 
 const WorldMaterial = shaderMaterial(
   {
@@ -243,94 +244,97 @@ const Capsule = () => {
 const Traveller = () => {
   const t = useRef();
   const matcap = useTexture("/textures/matcap-hot.png");
-	const keysDown = useRef({ w: false, a: false, s: false, d: false });
+  const keysDown = useRef({ w: false, a: false, s: false, d: false });
 
   useEffect(() => {
     window.addEventListener("keydown", e => {
       // Keyboard WASD and arrow keys using key codes
-      if(e.code === "KeyS" || e.code === "ArrowDown") {
-				keysDown.current.s = true;
-			}
-			if(e.code === "KeyW" || e.code === "ArrowUp") {
-				keysDown.current.w = true;
-			}
-			if(e.code === "KeyA" || e.code === "ArrowLeft") {
-				keysDown.current.a = true;
-			}
-			if(e.code === "KeyD" || e.code === "ArrowRight") {
-				keysDown.current.d = true;
-			}
+      if (e.code === "KeyS" || e.code === "ArrowDown") {
+        keysDown.current.s = true;
+      }
+      if (e.code === "KeyW" || e.code === "ArrowUp") {
+        keysDown.current.w = true;
+      }
+      if (e.code === "KeyA" || e.code === "ArrowLeft") {
+        keysDown.current.a = true;
+      }
+      if (e.code === "KeyD" || e.code === "ArrowRight") {
+        keysDown.current.d = true;
+      }
     });
 
-		window.addEventListener("keyup", e => {
-			if(e.code === "KeyS" || e.code === "ArrowDown") {
-				keysDown.current.s = false;
-			}
-			if(e.code === "KeyW" || e.code === "ArrowUp") {
-				keysDown.current.w = false;
-			}
-			if(e.code === "KeyA" || e.code === "ArrowLeft") {
-				keysDown.current.a = false;
-			}
-			if(e.code === "KeyD" || e.code === "ArrowRight") {
-				keysDown.current.d = false;
-			}
-		});
+    window.addEventListener("keyup", e => {
+      if (e.code === "KeyS" || e.code === "ArrowDown") {
+        keysDown.current.s = false;
+      }
+      if (e.code === "KeyW" || e.code === "ArrowUp") {
+        keysDown.current.w = false;
+      }
+      if (e.code === "KeyA" || e.code === "ArrowLeft") {
+        keysDown.current.a = false;
+      }
+      if (e.code === "KeyD" || e.code === "ArrowRight") {
+        keysDown.current.d = false;
+      }
+    });
   }, []);
 
-	const [pitchInertia, setPitchInertia] = useState(0);
-	const [rollInertia, setRollInertia] = useState(0);
-	const [yawInertia, setYawInertia] = useState(0);
+  const [pitchInertia, setPitchInertia] = useState(0);
+  const [rollInertia, setRollInertia] = useState(0);
+  const [yawInertia, setYawInertia] = useState(0);
 
   useFrame((state, delta) => {
-		// Clamp delta
-		delta = Math.min(delta, 0.1);
+    // Clamp delta
+    delta = Math.min(delta, 0.1);
 
-		// Loop through keysDown and update position with inertia
-		if (keysDown.current.w) {
-			setPitchInertia(pitchInertia <= -50 ? -50 : pitchInertia - 0.1);
-		}
+    // Loop through keysDown and update position with inertia
+    if (keysDown.current.w) {
+      setPitchInertia(pitchInertia <= -50 ? -50 : pitchInertia - 0.1);
+    }
 
-		if (keysDown.current.s) {
-			setPitchInertia(pitchInertia >= 50 ? 50 : pitchInertia + 0.1);
-		}
+    if (keysDown.current.s) {
+      setPitchInertia(pitchInertia >= 50 ? 50 : pitchInertia + 0.1);
+    }
 
-		if (keysDown.current.a) {
-			setRollInertia(rollInertia >= 35 ? 35 : rollInertia + 1);
-			setYawInertia(yawInertia >= 35 ? 35 : yawInertia + 1);
-		}
+    if (keysDown.current.a) {
+      setRollInertia(rollInertia >= 35 ? 35 : rollInertia + 1);
+      setYawInertia(yawInertia >= 35 ? 35 : yawInertia + 1);
+    }
 
-		if (keysDown.current.d) {
-			setRollInertia(rollInertia <= -35 ? -35 : rollInertia - 1);
-			setYawInertia(yawInertia <= -35 ? -35 : yawInertia - 1);
-		}
-	
-		// Self-righting
-		if(!keysDown.current.w && !keysDown.current.s) {
-			setPitchInertia(MathUtils.lerp(pitchInertia, 0, delta * 1.1));
-			t.current.rotation.x = MathUtils.lerp(t.current.rotation.x, 0, delta * 1.1);
-		}
+    if (keysDown.current.d) {
+      setRollInertia(rollInertia <= -35 ? -35 : rollInertia - 1);
+      setYawInertia(yawInertia <= -35 ? -35 : yawInertia - 1);
+    }
 
-		if(!keysDown.current.a && !keysDown.current.d) {
-			setRollInertia(MathUtils.lerp(rollInertia, 0, delta * 1.1));
-			setYawInertia(MathUtils.lerp(yawInertia, 0, delta * 1.1));
-			t.current.rotation.z = MathUtils.lerp(t.current.rotation.z, 0, delta * 1.1);
-			t.current.rotation.y = MathUtils.lerp(t.current.rotation.y, 0, delta * 1.1);
-		}
+    // Self-righting
+    if (!keysDown.current.w && !keysDown.current.s) {
+      setPitchInertia(MathUtils.lerp(pitchInertia, 0, delta * 1.1));
+      t.current.rotation.x = MathUtils.lerp(t.current.rotation.x, 0, delta * 1.1);
+    }
 
-		// Update rotation
-		t.current.rotation.x += pitchInertia * delta * .1;
-		t.current.rotation.z += rollInertia * delta * .01;
-		t.current.rotation.y += yawInertia * delta * 0.005;
-		
-		// Update position
-		t.current.position.y += t.current.rotation.x * delta * 2.4;
-		t.current.position.x -= t.current.rotation.z * delta * 1.5;
+    if (!keysDown.current.a && !keysDown.current.d) {
+      setRollInertia(MathUtils.lerp(rollInertia, 0, delta * 1.1));
+      setYawInertia(MathUtils.lerp(yawInertia, 0, delta * 1.1));
+      t.current.rotation.z = MathUtils.lerp(t.current.rotation.z, 0, delta * 1.1);
+      t.current.rotation.y = MathUtils.lerp(t.current.rotation.y, 0, delta * 1.1);
+    }
 
-		// Move forwards and backwards automatically
-		// t.current.position.z += Math.sin(state.clock.elapsedTime * 0.5) * delta * .1;
+    tQ.setFromEuler(new Euler(pitchInertia * delta * 0.25, yawInertia * delta * 0.005, rollInertia * delta * 0.025, "XYZ"));
 
-		// Automatic flight
+    // Update rotation
+		t.current.quaternion.multiplyQuaternions(tQ, t.current.quaternion);
+    // t.current.rotation.x += pitchInertia * delta * 0.1;
+    // t.current.rotation.z += rollInertia * delta * 0.01;
+    // t.current.rotation.y += yawInertia * delta * 0.005;
+
+    // Update position
+    t.current.position.y += t.current.rotation.x * delta * 2.4;
+    t.current.position.x -= t.current.rotation.z * delta * 1.5;
+
+    // Move forwards and backwards automatically
+    // t.current.position.z += Math.sin(state.clock.elapsedTime * 0.5) * delta * .1;
+
+    // Automatic flight
     // pitch (up/down)
     // t.current.rotation.x = Math.cos(time * .3) * Math.sin(time * .8) * Math.PI * .2;
     // t.current.position.y += t.current.rotation.x * delta_ * 1.2;
@@ -355,39 +359,39 @@ const Traveller = () => {
 
 const Beyond = props => {
   const planetBody = useRef();
-	const spaceCanvas = useRef();
+  const spaceCanvas = useRef();
 
-	const conf = useControls("beyond", {
-		spaceCanvasColour: "#ffbcbc",
-		spaceCanvasColour1: "#ffc2c2",
-		spaceCanvasColour2: "#00416f",
-		spaceCanvasColour3: "#90e010",
-	})
+  const conf = useControls("beyond", {
+    spaceCanvasColour: "#ffbcbc",
+    spaceCanvasColour1: "#ffc2c2",
+    spaceCanvasColour2: "#00416f",
+    spaceCanvasColour3: "#90e010",
+  });
 
   useFrame((state, delta) => {
     planetBody.current.material.uniforms.uTime.value += delta;
-		spaceCanvas.current.material.uniforms.uTime.value += delta;
+    spaceCanvas.current.material.uniforms.uTime.value += delta;
   });
 
-	const SpaceCanvasMaterial = shaderMaterial(
-		{ 
-			uColor: new Color(conf.spaceCanvasColour),
-			uColor1: new Color(conf.spaceCanvasColour1),
-			uColor2: new Color(conf.spaceCanvasColour2),
-			uColor3: new Color(conf.spaceCanvasColour3),
-			uTime: Math.random() * 999,
-		},
-		`
+  const SpaceCanvasMaterial = shaderMaterial(
+    {
+      uColor: new Color(conf.spaceCanvasColour),
+      uColor1: new Color(conf.spaceCanvasColour1),
+      uColor2: new Color(conf.spaceCanvasColour2),
+      uColor3: new Color(conf.spaceCanvasColour3),
+      uTime: Math.random() * 999,
+    },
+    `
 			varying vec2 vUv;
 			void main() {
 				vUv = uv;
 				gl_Position = projectionMatrix * modelViewMatrix * vec4(position, 1.0);
 			}
 		`,
-		spaceCanvasFragmentShader
-	);
+    spaceCanvasFragmentShader
+  );
 
-	const spaceCanvasMaterial = new SpaceCanvasMaterial();
+  const spaceCanvasMaterial = new SpaceCanvasMaterial();
 
   return (
     <>
@@ -425,7 +429,7 @@ const App = () => {
         <Beyond />
         <Traveller />
       </Canvas>
-			<LogoMark />
+      <LogoMark />
       <Story />
     </>
   );
