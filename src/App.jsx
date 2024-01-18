@@ -319,10 +319,9 @@ const Traveller = () => {
       t.current.rotation.y = MathUtils.lerp(t.current.rotation.y, 0, delta * 1.1);
     }
 
-    tQ.setFromEuler(new Euler(pitchInertia * delta * 0.25, yawInertia * delta * 0.005, rollInertia * delta * 0.025, "XYZ"));
-
     // Update rotation
-		t.current.quaternion.multiplyQuaternions(tQ, t.current.quaternion);
+    tQ.setFromEuler(new Euler(pitchInertia * delta * 0.25, yawInertia * delta * 0.005, rollInertia * delta * 0.025, "XYZ"));
+		t.current.quaternion.multiplyQuaternions(tQ, t.current.quaternion);	
     // t.current.rotation.x += pitchInertia * delta * 0.1;
     // t.current.rotation.z += rollInertia * delta * 0.01;
     // t.current.rotation.y += yawInertia * delta * 0.005;
