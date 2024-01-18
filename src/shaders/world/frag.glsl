@@ -2,13 +2,6 @@ precision mediump float;
 
 uniform vec3 uCapsuleColourFar;
 uniform vec3 uCapsuleColourNear;
-uniform float uParam1;
-uniform float uParam2;
-uniform float uParam3;
-uniform float uParam4;
-uniform float uParam5;
-uniform float uParam6;
-uniform float uParam7;
 uniform float uTime;
 varying float vElevation;
 varying vec3 vLevel;

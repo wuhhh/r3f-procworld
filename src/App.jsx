@@ -1,4 +1,4 @@
-import { useEffect, useRef, useState } from "react";
+import { useEffect, useMemo, useRef, useState } from "react";
 import { Canvas, extend, useFrame } from "@react-three/fiber";
 import { Float, OrbitControls, PerspectiveCamera, shaderMaterial, useTexture } from "@react-three/drei";
 import { BackSide, Color, DoubleSide, Euler, MathUtils, Quaternion, Vector3 } from "three";
@@ -12,7 +12,7 @@ import worldVertexShader from "./shaders/world/vert.glsl";
 import worldFragmentShader from "./shaders/world/frag.glsl";
 import planetBodyVertexShader from "./shaders/planetBody/vert.glsl";
 import planetBodyFragmentShader from "./shaders/planetBody/frag.glsl";
-import spaceCanvasVertexShader from "./shaders/spaceCanvas/vert.glsl";
+// import spaceCanvasVertexShader from "./shaders/spaceCanvas/vert.glsl";
 import spaceCanvasFragmentShader from "./shaders/spaceCanvas/frag.glsl";
 
 const disableMotion = false;
@@ -23,15 +23,6 @@ const WorldMaterial = shaderMaterial(
     uCapsuleColourFar: null,
     uCapsuleColourNear: null,
     uDepth: 0.0,
-    uParam1: 0.0,
-    uParam2: 0.0,
-    uParam3: 0.0,
-    uParam4: 0.0,
-    uParam5: 0.0,
-    uParam6: 0.0,
-    uParam7: 0.0,
-    uParam8: 0.0,
-    uScapeMix: 0.0,
     uRadius: 0.0,
     uTime: Math.random() * 999,
   },
@@ -52,60 +43,6 @@ const Capsule = () => {
   const worldConf = useControls("world", {
     uCapsuleColourFar: "#ff4848",
     uCapsuleColourNear: "#00416f",
-    scapeMix: {
-      value: 0.0,
-      min: 0.0,
-      max: 1.0,
-      step: 0.01,
-    },
-    uParam1: {
-      value: 0.0,
-      min: -1.0,
-      max: 1.0,
-      step: 0.1,
-    },
-    uParam2: {
-      value: 0.0,
-      min: -1.0,
-      max: 1.0,
-      step: 0.1,
-    },
-    uParam3: {
-      value: 0.0,
-      min: -32.0,
-      max: 32.0,
-      step: 0.1,
-    },
-    uParam4: {
-      value: 0.0,
-      min: -32.0,
-      max: 32.0,
-      step: 0.1,
-    },
-    uParam5: {
-      value: 0.0,
-      min: -32.0,
-      max: 32.0,
-      step: 0.1,
-    },
-    uParam6: {
-      value: 0.0,
-      min: -32.0,
-      max: 32.0,
-      step: 0.1,
-    },
-    uParam7: {
-      value: 0.0,
-      min: -32.0,
-      max: 32.0,
-      step: 0.1,
-    },
-    uParam8: {
-      value: 0.0,
-      min: -32.0,
-      max: 32.0,
-      step: 0.1,
-    },
   });
 
   const vertices_ = [];
@@ -134,6 +71,9 @@ const Capsule = () => {
     }
   };
 
+	/**
+	 * Generate UVs
+	 */
   const generateUVs = () => {
     for (let i = 0; i < tubularSegments; i++) {
       for (let j = 0; j < radialSegments; j++) {
@@ -144,6 +84,9 @@ const Capsule = () => {
     }
   };
 
+	/**
+	 * Generate indices
+	 */
   const generateIndices = (offset = 0) => {
     for (let i = 0; i < tubularSegments - 1; i++) {
       for (let j = 0; j < radialSegments; j++) {
@@ -160,47 +103,53 @@ const Capsule = () => {
     }
   };
 
-  /**
-   * FIRST PASS
-   */
+	// Generate the capsule [the hard way :D]
+	const { vertices, normals, levels, uvs, indices } = useMemo(() => {
+		/**
+		 * FIRST PASS
+		 */
 
-  // Generate vertices
-  for (let i = 0; i < tubularSegments; i++) {
-    generateSegment(i, radius, [1, 0, 0]);
-  }
+		// Generate vertices
+		for (let i = 0; i < tubularSegments; i++) {
+			generateSegment(i, radius, [1, 0, 0]);
+		}
 
-  // Generate the last row of vertices
-  // generateSegment(tubularSegments, radius, [1, 0, 0]);
+		// Generate the last row of vertices
+		// generateSegment(tubularSegments, radius, [1, 0, 0]);
 
-  // Generate UVs
-  generateUVs();
+		// Generate UVs
+		generateUVs();
 
-  // Generate indices
-  generateIndices(0);
+		// Generate indices
+		generateIndices(0);
 
-  /**
-   * SECOND PASS
-   */
+		/**
+		 * SECOND PASS
+		 */
 
-  // Generate vertices
-  for (let i = 0; i < tubularSegments; i++) {
-    generateSegment(i, radius * 0.9, [0, 1, 0]);
-  }
+		// Generate vertices
+		for (let i = 0; i < tubularSegments; i++) {
+			generateSegment(i, radius * 0.9, [0, 1, 0]);
+		}
 
-  // Generate the last row of vertices
-  // generateSegment(tubularSegments * 2, radius * .5, [0, 1, 0]);
+		// Generate the last row of vertices
+		// generateSegment(tubularSegments * 2, radius * .5, [0, 1, 0]);
 
-  // Generate UVs
-  generateUVs();
+		// Generate UVs
+		generateUVs();
 
-  // Generate indices
-  generateIndices(radialSegments * tubularSegments);
+		// Generate indices
+		generateIndices(radialSegments * tubularSegments);
 
-  const vertices = new Float32Array(vertices_);
-  const normals = new Float32Array(normals_);
-  const levels = new Float32Array(levels_);
-  const uvs = new Float32Array(uvs_);
-  const indices = new Uint16Array(indices_);
+		const vertices = new Float32Array(vertices_);
+		const normals = new Float32Array(normals_);
+		const levels = new Float32Array(levels_);
+		const uvs = new Float32Array(uvs_);
+		const indices = new Uint16Array(indices_);
+
+		return { vertices, normals, levels, uvs, indices };
+
+	}, [radialSegments, tubularSegments]);
 
   useFrame((_, delta) => {
     worldMaterial.current.uniforms.uTime.value += delta * (disableMotion ? 0 : 1);
@@ -224,15 +173,6 @@ const Capsule = () => {
           uCapsuleColourFar={new Color(worldConf.uCapsuleColourFar)}
           uCapsuleColourNear={new Color(worldConf.uCapsuleColourNear)}
           uDepth={depth}
-          uParam1={worldConf.uParam1}
-          uParam2={worldConf.uParam2}
-          uParam3={worldConf.uParam3}
-          uParam4={worldConf.uParam4}
-          uParam5={worldConf.uParam5}
-          uParam6={worldConf.uParam6}
-          uParam7={worldConf.uParam7}
-          uParam8={worldConf.uParam8}
-          uScapeMix={worldConf.scapeMix}
           uRadius={radius}
           // wireframe
         />
@@ -426,10 +366,10 @@ const App = () => {
         <OrbitControls />
         <Capsule />
         <Beyond />
-        <Traveller />
+        {/* <Traveller /> */}
       </Canvas>
       <LogoMark />
-      <Story />
+      {/* <Story /> */}
     </>
   );
 };

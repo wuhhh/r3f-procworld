@@ -1,9 +1,6 @@
 precision mediump float;
 
 uniform float uDepth;
-uniform float uParam1;
-uniform float uParam2;
-uniform float uScapeMix;
 uniform float uRadius;
 uniform float uTime;
 
