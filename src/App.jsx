@@ -24,8 +24,8 @@ const WorldMaterial = shaderMaterial(
     uCapsuleColourNear: null,
     uDepth: 0.0,
     uRadius: 0.0,
-		uTime: 0.0,
-    // uTime: Math.random() * 999,
+    // uTime: 0.0,
+    uTime: Math.random() * 999,
   },
   worldVertexShader,
   worldFragmentShader
@@ -51,6 +51,19 @@ const Capsule = () => {
   const levels_ = [];
   const uvs_ = [];
   const indices_ = [];
+  const debrisOpacity_ = [];
+  const debrisShape_ = [];
+  const debrisColour_ = [];
+	const debrisSpeed_ = [];
+
+  const debrisAttrs = () => {
+    return {
+      opacity: Math.random(),
+      shape: Math.floor(Math.random() * 4), // 0 - 3
+      colour: Math.floor(Math.random() * 3), // 0 - 2
+			speed: Math.random() * 4 + 1, // 1.0 - 5.0
+    };
+  };
 
   /**
    * Generate a segment of vertices
@@ -67,14 +80,21 @@ const Capsule = () => {
       const z = (i / (tubularSegments - 1) - 0.5) * depth;
       vertices_.push(x, y, z);
       levels_.push(...l);
+
+      // Fill debris attributes with 0s
+      debrisOpacity_.push(0);
+      debrisShape_.push(0);
+      debrisColour_.push(0);
+			debrisSpeed_.push(0);
+
       const normal = new Vector3(x, y, 0.0).normalize().multiplyScalar(-1);
       normals_.push(normal.x, normal.y, normal.z);
     }
   };
 
-	/**
-	 * Generate UVs
-	 */
+  /**
+   * Generate UVs
+   */
   const generateTubeUVs = () => {
     for (let i = 0; i < tubularSegments; i++) {
       for (let j = 0; j < radialSegments; j++) {
@@ -84,9 +104,9 @@ const Capsule = () => {
     }
   };
 
-	/**
-	 * Generate indices
-	 */
+  /**
+   * Generate indices
+   */
   const generateTubeIndices = (offset = 0) => {
     for (let i = 0; i < tubularSegments - 1; i++) {
       for (let j = 0; j < radialSegments; j++) {
@@ -95,100 +115,146 @@ const Capsule = () => {
         const c = offset + (i + 1) * radialSegments + ((j + 1) % radialSegments);
         const d = offset + (i + 1) * radialSegments + j;
 
-				// Original winding order
+        // Original winding order
         // indices_.push(a, b, c);
         // indices_.push(a, c, d);
 
-				// Reverse the order of vertices to invert the winding order
-				// This changes the winding order from counter-clockwise to clockwise
-				indices_.push(a, c, b);  // Inverted triangle (across diagonal)
-				indices_.push(a, d, c);  // Original triangle (across diagonal)
+        // Reverse the order of vertices to invert the winding order
+        // This changes the winding order from counter-clockwise to clockwise
+        indices_.push(a, c, b); // Inverted triangle (across diagonal)
+        indices_.push(a, d, c); // Original triangle (across diagonal)
       }
     }
   };
 
-	/**
-	 * Generate plane [the easy way :D]
-	 */
-	const generatePlane = (w, h, position = new Vector3) => {
-		const plane = new PlaneGeometry(w, h);
-		const planeVertices = plane.attributes.position.array;
-		const planeNormals = plane.attributes.normal.array;
-		const planeUvs = plane.attributes.uv.array;
+  /**
+   * Generate plane [the easy way :D]
+   */
+  const generatePlane = (w, h, position = new Vector3()) => {
+    const plane = new PlaneGeometry(w, h);
+    const planeVertices = plane.attributes.position.array;
+    const planeNormals = plane.attributes.normal.array;
+    const planeUvs = plane.attributes.uv.array;
 
-		// Fill plane levels with [1, 0, 0]
-		const planeLevels = [];
-		for (let i = 0; i < planeVertices.length; i++) {
-			planeLevels.push(1, 0, 0);
+		// Transform planeVertices to position 
+		for (let i = 0; i < planeVertices.length; i += 3) {
+			planeVertices[i] += position.x;
+			planeVertices[i + 1] += position.y;
+			planeVertices[i + 2] += position.z;
 		}
 
-		// Generate plane indices from position array
-		const planeIndices = [];
-		const icosaOffset = (radialSegments * tubularSegments) * 2;
-		for (let i = 0; i < planeVertices.length / 3 / 2 / 2; i++) {
-			const a = icosaOffset + i;
-			const b = icosaOffset + i + 1;
-			const c = icosaOffset + i + 2;
-			const d = icosaOffset + i + 3;
-			planeIndices.push(c, b, a);
-			planeIndices.push(c, d, b);
+		// Get debris attributes with random values
+		const { 
+			opacity: dOpacity, 
+			shape: dShape, 
+			colour: dColour,
+			speed: dSpeed,
+		} = debrisAttrs();
+
+		console.log('dOpacity', dOpacity);
+		console.log('dShape', dShape);
+		console.log('dColour', dColour);
+		console.log('dSpeed', dSpeed);
+		
+
+    // Fill levels and debris attributes
+    const planeLevels = [];
+    for (let i = 0; i < planeVertices.length; i++) {
+      planeLevels.push(1, 0, 0);
+			
+			debrisOpacity_.push(dOpacity);
+			debrisShape_.push(dShape);
+			debrisColour_.push(dColour);
+			debrisSpeed_.push(dSpeed);
+    }
+
+    // Generate plane indices from position array
+    const planeIndices = [];
+    const offset = vertices_.length / 3;
+
+    planeIndices.push(offset + 2, offset + 1, offset + 0, offset + 2, offset + 3, offset + 1);
+
+    vertices_.push(...planeVertices);
+    normals_.push(...planeNormals);
+    levels_.push(...planeLevels);
+    uvs_.push(...planeUvs);
+    indices_.push(...planeIndices);
+
+  };
+
+  // Generate the capsule [the hard way :D]
+  const { vertices, normals, levels, uvs, indices, debrisOpacity, debrisShape, debrisColour, debrisSpeed } = useMemo(() => {
+    /**
+     * FIRST PASS : Outer layer / capsule terrain
+     */
+
+    // Generate vertices
+    for (let i = 0; i < tubularSegments; i++) {
+      generateTubeSegment(i, radius, [0, 0, 0]);
+    }
+
+    // Generate UVs
+    generateTubeUVs();
+
+    // Generate indices
+    generateTubeIndices(0);
+
+    /**
+     * SECOND PASS : Cloud layer
+     */
+
+    // Generate vertices
+    for (let i = 0; i < tubularSegments; i++) {
+      generateTubeSegment(i, radius * 0.9, [0, 1, 0]);
+    }
+
+    // Generate UVs
+    generateTubeUVs();
+
+    // Generate indices
+    generateTubeIndices(radialSegments * tubularSegments);
+
+    /**
+     * THIRD PASS : Debris layer
+     */
+
+    // Generate a plane
+
+		// Test planes
+		// generatePlane(1.0, 1.0, new Vector3(0, 0, 0));
+		// generatePlane(1.0, 1.0, new Vector3(0, 0, -1));
+		// generatePlane(1.0, 1.0, new Vector3(0, 0, -2));
+		// generatePlane(1.0, 1.0, new Vector3(0, 0, -3));
+		// generatePlane(1.0, 1.0, new Vector3(0, 0, 1));
+		// generatePlane(1.0, 1.0, new Vector3(0, 0, 2));
+		// generatePlane(1.0, 1.0, new Vector3(0, 0, 3));
+
+		// Smol planes
+		for(let i = 0; i < 20; i++) {
+			generatePlane(.1, .1, new Vector3(Math.random() * 4 - 2, Math.random() * 4 - 2, Math.random() * depth - depth * 0.5));
 		}
 
-		vertices_.push(...planeVertices);
-		normals_.push(...planeNormals);
-		levels_.push(...planeLevels);
-		uvs_.push(...planeUvs);
-		indices_.push(...planeIndices);
-	};
+    const vertices = new Float32Array(vertices_);
+    const normals = new Float32Array(normals_);
+    const levels = new Float32Array(levels_);
+    const uvs = new Float32Array(uvs_);
+    const indices = new Uint16Array(indices_);
+    const debrisOpacity = new Float32Array(debrisOpacity_);
+    const debrisShape = new Float32Array(debrisShape_);
+    const debrisColour = new Float32Array(debrisColour_);
+		const debrisSpeed = new Float32Array(debrisSpeed_);
 
-	// Generate the capsule [the hard way :D]
-	const { vertices, normals, levels, uvs, indices } = useMemo(() => {
-		/**
-		 * FIRST PASS : Outer layer / capsule terrain
-		 */
+    return { vertices, normals, levels, uvs, indices, debrisOpacity, debrisShape, debrisColour, debrisSpeed };
+  }, [radialSegments, tubularSegments]);
 
-		// Generate vertices
-		for (let i = 0; i < tubularSegments; i++) {
-			generateTubeSegment(i, radius, [0, 0, 0]);
-		}
-
-		// Generate UVs
-		generateTubeUVs();
-
-		// Generate indices
-		generateTubeIndices(0);
-
-		/**
-		 * SECOND PASS : Cloud layer
-		 */
-
-		// Generate vertices
-		for (let i = 0; i < tubularSegments; i++) {
-			generateTubeSegment(i, radius * 0.9, [0, 1, 0]);
-		}
-
-		// Generate UVs
-		generateTubeUVs();
-
-		// Generate indices
-		generateTubeIndices(radialSegments * tubularSegments);
-
-		/**
-		 * THIRD PASS : Debris layer
-		 */
-
-		// Generate a plane 
-		generatePlane(.1, .1, new Vector3(0, 0, 0));
-
-		const vertices = new Float32Array(vertices_);
-		const normals = new Float32Array(normals_);
-		const levels = new Float32Array(levels_);
-		const uvs = new Float32Array(uvs_);
-		const indices = new Uint16Array(indices_);
-
-		return { vertices, normals, levels, uvs, indices };
-
-	}, [radialSegments, tubularSegments]);
+	console.log('vertices', vertices.length);
+	console.log('normals', normals.length);
+	console.log('levels', levels.length);
+	console.log('uvs', uvs.length);
+	console.log('indices', indices.length);
+	console.log('debrisOpacity', debrisOpacity.length);
+	console.log('debrisShape', debrisShape.length);
+	console.log('debrisColour', debrisColour.length);
 
   useFrame((_, delta) => {
     worldMaterial.current.uniforms.uTime.value += delta * (disableMotion ? 0 : 1);
@@ -203,6 +269,10 @@ const Capsule = () => {
           <bufferAttribute attach='attributes-normal' count={normals.length / 3} array={normals} itemSize={3} />
           <bufferAttribute attach='attributes-level' count={levels.length / 3} array={levels} itemSize={3} />
           <bufferAttribute attach='attributes-uv' count={uvs.length / 2} array={uvs} itemSize={2} />
+          <bufferAttribute attach='attributes-debrisOpacity' count={debrisOpacity.length} array={debrisOpacity} itemSize={1} />
+          <bufferAttribute attach='attributes-debrisShape' count={debrisShape.length} array={debrisShape} itemSize={1} />
+          <bufferAttribute attach='attributes-debrisColour' count={debrisColour.length} array={debrisColour} itemSize={1} />
+          <bufferAttribute attach='attributes-debrisSpeed' count={debrisSpeed.length} array={debrisSpeed} itemSize={1} />
           <bufferAttribute attach='index' count={indices.length} array={indices} itemSize={1} />
         </bufferGeometry>
         <worldMaterial
@@ -265,22 +335,27 @@ const Traveller = () => {
     delta = Math.min(delta, 0.1);
 
     // Loop through keysDown and update position with inertia
+
+		// Up
     if (keysDown.current.w) {
-      setPitchInertia(pitchInertia <= -50 ? -50 : pitchInertia - delta * 10);
+      setPitchInertia(pitchInertia <= -50 ? -50 : pitchInertia - delta * 8);
     }
 
+		// Down
     if (keysDown.current.s) {
-      setPitchInertia(pitchInertia >= 50 ? 50 : pitchInertia + delta * 10);
+      setPitchInertia(pitchInertia >= 50 ? 50 : pitchInertia + delta * 8);
     }
 
+		// Left
     if (keysDown.current.a) {
-      setRollInertia(rollInertia >= 35 ? 35 : rollInertia + delta * 100);
-      setYawInertia(yawInertia >= 35 ? 35 : yawInertia + delta * 100);
+      setRollInertia(rollInertia >= 35 ? 35 : rollInertia + delta * 80);
+      setYawInertia(yawInertia >= 35 ? 35 : yawInertia + delta * 80);
     }
 
+		// Right
     if (keysDown.current.d) {
-      setRollInertia(rollInertia <= -35 ? -35 : rollInertia - delta * 100);
-      setYawInertia(yawInertia <= -35 ? -35 : yawInertia - delta * 100);
+      setRollInertia(rollInertia <= -35 ? -35 : rollInertia - delta * 80);
+      setYawInertia(yawInertia <= -35 ? -35 : yawInertia - delta * 80);
     }
 
     // Self-righting
@@ -298,7 +373,7 @@ const Traveller = () => {
 
     // Update rotation
     tQ.setFromEuler(new Euler(pitchInertia * delta * 0.25, yawInertia * delta * 0.005, rollInertia * delta * 0.025, "XYZ"));
-		t.current.quaternion.multiplyQuaternions(tQ, t.current.quaternion);	
+    t.current.quaternion.multiplyQuaternions(tQ, t.current.quaternion);
     // t.current.rotation.x += pitchInertia * delta * 0.1;
     // t.current.rotation.z += rollInertia * delta * 0.01;
     // t.current.rotation.y += yawInertia * delta * 0.005;
@@ -326,9 +401,7 @@ const Traveller = () => {
     // t.current.position.z += t.current.rotation.x * delta_ * 0.6;
   });
 
-  return (
-    <Model ref={t} scale={[0.05, 0.05, 0.05]} position={[0.5, -0.2, 2]} />
-  );
+  return <Model ref={t} scale={[0.05, 0.05, 0.05]} position={[0.5, -0.2, 2]} />;
 };
 
 const Beyond = props => {
@@ -394,7 +467,6 @@ const App = () => {
   return (
     <>
       <Canvas flat linear>
-				<fog attach="fog" color="hotpink" near={1} far={10} />
         <Leva hidden />
         <Float speed={disableMotion ? 0 : 2}>
           <PerspectiveCamera makeDefault fov={90} position={[0, 0, 3.9]} />

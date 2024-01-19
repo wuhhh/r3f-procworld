@@ -5,10 +5,19 @@ uniform float uRadius;
 uniform float uTime;
 
 attribute vec3 level;
+attribute float debrisOpacity;
+attribute float debrisShape;
+attribute float debrisColour;
+attribute float debrisSpeed;
 
 varying float vElevation;
 varying vec3 vLevel;
 varying vec2 vUv;
+varying float vDebrisOpacity;
+varying float vDebrisShape;
+varying float vDebrisColour;
+varying float vDebrisSpeed;
+varying float vZDistanceFromCamera;
 
 // vLevel.x : 1.0 debris (planes)
 // vLevel.x : 0.0 terrain and clouds
@@ -22,11 +31,14 @@ void main() {
 	
 	vUv = uv;
 	vLevel = level;
+	vDebrisOpacity = debrisOpacity;
+	vDebrisShape = debrisShape;
+	vDebrisColour = debrisColour;
+	vDebrisSpeed = debrisSpeed;
 
 	vec3 pos = position;
 	float speed = 2.3;
 	vec3 travel = vec3(pos.x, pos.y, pos.z - uTime * speed);
-	// travel.z += (smoothstep(.5, 1., uv.x) * uv.y * 5.); // ceiling vortex
 
 	vec3 scape1 = pos;
 	vec3 scape2 = pos;
@@ -63,7 +75,8 @@ void main() {
 
 	// Debris test 
 	vec3 debrisPos = position;
-	vec3 debrisTravel = vec3(debrisPos.x, debrisPos.y, mod(uTime * speed, uDepth * 2.) - uDepth) * vLevel.x;
+	vec3 debrisTravel = vec3(debrisPos.x, debrisPos.y, mod(uTime * debrisSpeed, uDepth * 2.) - uDepth) * vLevel.x;
+	vZDistanceFromCamera = distance(debrisTravel.z, cameraPosition.z) / uDepth; 
 
 	// Elevation 
 	vElevation = distance(postPos.xy, position.xy);

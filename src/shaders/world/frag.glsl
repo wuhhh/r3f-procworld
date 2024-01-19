@@ -1,13 +1,23 @@
 precision mediump float;
 
+uniform float uDepth;
 uniform vec3 uCapsuleColourFar;
 uniform vec3 uCapsuleColourNear;
 uniform float uTime;
+
 varying float vElevation;
 varying vec3 vLevel;
 varying vec2 vUv;
+varying float vDebrisOpacity;
+varying float vDebrisShape;
+varying float vDebrisColour;
+varying float vZDistanceFromCamera;
 
-// vLevel.y 0 = capsule, 1 = cloud
+// vLevel.x : 1.0 debris (planes)
+// vLevel.x : 0.0 terrain and clouds
+
+// vLevel.y : 0.0 terrain
+// vLevel.y : 1.0 clouds
 
 #include "../lygia/generative/psrdnoise.glsl"
 #include "../lygia/color/blend/lighten.glsl"
@@ -46,10 +56,20 @@ void main() {
 	vec3 blend = blendLighten(base, brighter, 1.);
 
 	// Mix between capsule and cloud
-	vec4 postColour = mix(vec4(base, 1. - pow(vUv.y, 16.0)), vec4(blend, alpha), vLevel.y);
+	vec4 terrainCloudMix = mix(vec4(base, 1. - pow(vUv.y, 16.0)), vec4(blend, alpha), vLevel.y);
 
-	// Add some brighter patches using elevation from the vertex shader
-	postColour = brightnessContrast(postColour, pow(vElevation, 2.0) * .25, 1.05);
+	// Add some brighter patches using elevation from the vertex shader, bump contrast
+	terrainCloudMix = brightnessContrast(terrainCloudMix, pow(vElevation, 2.0) * .25, 1.05);
+
+	// Debris colour 
+	// vec4 debrisColour = vec4(1., 1., 1., pow(1.0 - (distance(vUv, vec2(.5, .5)) * 2.), 4.0) * vDebrisOpacity * 2.);
+	float debrisFog = 1. - pow(vZDistanceFromCamera, 8.0);
+	
+	// vec4 debrisColour = vec4(1., 1., 1., debrisFog * pow(1.0 - (distance(vUv, vec2(.5, .5)) * 2.), 4.0) * vDebrisOpacity);
+	vec4 debrisColour = vec4(1., .8, .7, debrisFog * vDebrisOpacity * smoothstep(.01, .99, 1.0 - (distance(vUv, vec2(.5, .5)) * 4.)) );
+
+	// Post 
+	vec4 postColour = mix(terrainCloudMix, debrisColour, vLevel.x);
 	
 	gl_FragColor = postColour;
 	// gl_FragColor = vec4(vUv.x, vUv.y, 0., 1.);
