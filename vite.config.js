@@ -13,5 +13,17 @@ export default defineConfig({
       "@src": resolve(__dirname, "./src"),
     },
   },
-  plugins: [react(), import("vite-plugin-glsl").then(glsl => glsl.default())],
+  plugins: [react(), import("vite-plugin-glsl").then(glsl => glsl.default({
+		include: [                   // Glob pattern, or array of glob patterns to import
+			'**/*.glsl', '**/*.wgsl',
+			'**/*.vert', '**/*.frag',
+			'**/*.vs', '**/*.fs'
+		],
+		exclude: undefined,          // Glob pattern, or array of glob patterns to ignore
+		warnDuplicatedImports: true, // Warn if the same chunk was imported multiple times
+		defaultExtension: 'glsl',    // Shader suffix when no extension is specified
+		compress: true,              // Compress output shader code
+		watch: true,                 // Recompile shader on change
+		root: '/src/shaders/' 			 // Root directory to resolve imports from
+	}))],
 });
