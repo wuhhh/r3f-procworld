@@ -1,3 +1,5 @@
+precision mediump float;
+
 uniform float uTime;
 varying vec3 vNormal;
 varying vec2 vUv;

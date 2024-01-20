@@ -1,3 +1,5 @@
+precision mediump float;
+
 uniform vec3 uColor;
 uniform vec3 uColor1;
 uniform vec3 uColor2;

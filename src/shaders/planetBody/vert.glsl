@@ -1,3 +1,5 @@
+precision mediump float;
+
 varying vec3 vNormal;
 varying vec2 vUv;
 varying vec3 vViewPosition;
