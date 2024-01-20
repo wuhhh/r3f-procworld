@@ -3,6 +3,7 @@ precision highp float;
 uniform float uDepth;
 uniform float uRadius;
 uniform float uTime;
+uniform vec3 uTravellerPos;
 
 attribute vec3 level;
 attribute float debrisOpacity;
@@ -17,6 +18,7 @@ varying float vDebrisOpacity;
 varying float vDebrisShape;
 varying float vDebrisColour;
 varying float vDebrisSpeed;
+varying float vTravellerDistance;
 varying float vZDistanceFromCamera;
 
 // vLevel.x : 1.0 debris (planes)
@@ -77,6 +79,12 @@ void main() {
 	vec3 debrisPos = position;
 	vec3 debrisTravel = vec3(debrisPos.x, debrisPos.y, mod(uTime * debrisSpeed, uDepth * 2.) - uDepth) * vLevel.x;
 	vZDistanceFromCamera = distance(debrisTravel.z, cameraPosition.z) / uDepth; 
+
+	// Traveller distance
+	vec4 travellerWorldPos = projectionMatrix * modelViewMatrix * vec4(uTravellerPos.xyz, 1.0);
+	vec4 postWorldPos = modelMatrix * vec4(postPos.xyz, 1.0);
+	float travellerDistance = distance(uTravellerPos.xyz, postWorldPos.xyz);
+	vTravellerDistance = travellerDistance;
 
 	// Elevation 
 	vElevation = distance(postPos.xy, position.xy);

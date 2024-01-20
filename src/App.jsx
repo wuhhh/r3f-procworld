@@ -16,6 +16,7 @@ import planetBodyFragmentShader from "./shaders/planetBody/frag.glsl";
 import spaceCanvasFragmentShader from "./shaders/spaceCanvas/frag.glsl";
 
 const disableMotion = false;
+const tPos = new Vector3();
 const tQ = new Quaternion();
 
 const WorldMaterial = shaderMaterial(
@@ -26,6 +27,7 @@ const WorldMaterial = shaderMaterial(
     uRadius: 0.0,
     // uTime: 0.0,
     uTime: Math.random() * 999,
+		uTravellerPos: new Vector3(0, 0, 0),
   },
   worldVertexShader,
   worldFragmentShader
@@ -151,10 +153,10 @@ const Capsule = () => {
 			speed: dSpeed,
 		} = debrisAttrs();
 
-		console.log('dOpacity', dOpacity);
-		console.log('dShape', dShape);
-		console.log('dColour', dColour);
-		console.log('dSpeed', dSpeed);
+		// console.log('dOpacity', dOpacity);
+		// console.log('dShape', dShape);
+		// console.log('dColour', dColour);
+		// console.log('dSpeed', dSpeed);
 		
 
     // Fill levels and debris attributes
@@ -247,19 +249,20 @@ const Capsule = () => {
     return { vertices, normals, levels, uvs, indices, debrisOpacity, debrisShape, debrisColour, debrisSpeed };
   }, [radialSegments, tubularSegments]);
 
-	console.log('vertices', vertices.length);
-	console.log('normals', normals.length);
-	console.log('levels', levels.length);
-	console.log('uvs', uvs.length);
-	console.log('indices', indices.length);
-	console.log('debrisOpacity', debrisOpacity.length);
-	console.log('debrisShape', debrisShape.length);
-	console.log('debrisColour', debrisColour.length);
+	// console.log('vertices', vertices.length);
+	// console.log('normals', normals.length);
+	// console.log('levels', levels.length);
+	// console.log('uvs', uvs.length);
+	// console.log('indices', indices.length);
+	// console.log('debrisOpacity', debrisOpacity.length);
+	// console.log('debrisShape', debrisShape.length);
+	// console.log('debrisColour', debrisColour.length);
 
   useFrame((_, delta) => {
     worldMaterial.current.uniforms.uTime.value += delta * (disableMotion ? 0 : 1);
+		worldMaterial.current.uniforms.uTravellerPos.value = tPos;
     capsule.current.rotation.z = Math.PI * 0.5 + Math.sin(_.clock.elapsedTime * 0.001) * Math.PI * (disableMotion ? 0 : 0.1);
-  });
+	});
 
   return (
     <>
@@ -399,6 +402,9 @@ const Traveller = () => {
 
     // fwd/bwd
     // t.current.position.z += t.current.rotation.x * delta_ * 0.6;
+
+		// Update traveller position
+		tPos.setFromMatrixPosition(t.current.matrixWorld);
   });
 
   return <Model ref={t} scale={[0.05, 0.05, 0.05]} position={[0.5, -0.2, 2]} />;

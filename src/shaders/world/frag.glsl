@@ -11,6 +11,7 @@ varying vec2 vUv;
 varying float vDebrisOpacity;
 varying float vDebrisShape;
 varying float vDebrisColour;
+varying float vTravellerDistance;
 varying float vZDistanceFromCamera;
 
 // vLevel.x : 1.0 debris (planes)
@@ -22,6 +23,10 @@ varying float vZDistanceFromCamera;
 #include "../lygia/generative/psrdnoise.glsl"
 #include "../lygia/color/blend/lighten.glsl"
 #include "../lygia/color/brightnessContrast.glsl"
+
+float map(float value, float inMin, float inMax, float outMin, float outMax) {
+  return outMin + (outMax - outMin) * (value - inMin) / (inMax - inMin);
+}
 
 void main() {
 	float speed = .45;
@@ -68,8 +73,13 @@ void main() {
 	// vec4 debrisColour = vec4(1., 1., 1., debrisFog * pow(1.0 - (distance(vUv, vec2(.5, .5)) * 2.), 4.0) * vDebrisOpacity);
 	vec4 debrisColour = vec4(1., .8, .7, debrisFog * vDebrisOpacity * smoothstep(.01, .99, 1.0 - (distance(vUv, vec2(.5, .5)) * 4.)) );
 
+	// Traveller proximity
+	float proximityTest = 1.; // Should be a uniform
+	float travellerProximity = vTravellerDistance <= proximityTest ? 1.0 - vTravellerDistance : 0.0;
+	// vec4 travellerColour = vec4(brighter, travellerProximity);
+
 	// Post 
-	vec4 postColour = mix(terrainCloudMix, debrisColour, vLevel.x);
+	vec4 postColour = mix(mix(terrainCloudMix, debrisColour, vLevel.x), vec4(uCapsuleColourFar, 1.0), travellerProximity * vLevel.y);
 	
 	gl_FragColor = postColour;
 	// gl_FragColor = vec4(vUv.x, vUv.y, 0., 1.);
