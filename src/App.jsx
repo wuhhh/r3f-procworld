@@ -158,7 +158,6 @@ const Capsule = () => {
 		// console.log('dColour', dColour);
 		// console.log('dSpeed', dSpeed);
 		
-
     // Fill levels and debris attributes
     const planeLevels = [];
     for (let i = 0; i < planeVertices.length; i++) {
@@ -195,11 +194,41 @@ const Capsule = () => {
       generateTubeSegment(i, radius, [0, 0, 0]);
     }
 
+		// Duplicate the first segment of vertices to create a flat top
+		const firstSegment = vertices_.slice(0, radialSegments * 3);
+		vertices_.push(...firstSegment);
+
+		// Duplicate the first segment of normals to create a flat top
+		const firstSegmentNormals = normals_.slice(0, radialSegments * 3);
+		normals_.push(...firstSegmentNormals);
+
+		// Duplicate the first segment of uvs to create a flat top
+		/* const firstSegmentUvs = uvs_.slice(0, radialSegments * 2);
+		uvs_.push(...firstSegmentUvs); */
+
+		for(let i = 0; i < firstSegment.length / 3; i++) {
+			uvs_.push(1, 1);
+			levels_.push(0, 0, 0);
+			debrisOpacity_.push(0);
+			debrisShape_.push(0);
+			debrisColour_.push(0);
+			debrisSpeed_.push(0);
+		}
+
     // Generate UVs
     generateTubeUVs();
-
+		
     // Generate indices
     generateTubeIndices(0);
+
+		// Generate the top indices
+		const topIndices = [];
+		for (let i = 0; i < radialSegments - 2; i++) {
+			topIndices.push(0);
+			topIndices.push(i + 1);
+			topIndices.push(i + 2);
+		}
+		indices_.push(...topIndices);
 
     /**
      * SECOND PASS : Cloud layer
@@ -261,7 +290,7 @@ const Capsule = () => {
   useFrame((_, delta) => {
     worldMaterial.current.uniforms.uTime.value += delta * (disableMotion ? 0 : 1);
 		worldMaterial.current.uniforms.uTravellerPos.value = tPos;
-    capsule.current.rotation.z = Math.PI * 0.5 + Math.sin(_.clock.elapsedTime * 0.001) * Math.PI * (disableMotion ? 0 : 0.1);
+    // capsule.current.rotation.z = Math.PI * 0.5 + Math.sin(_.clock.elapsedTime * 0.001) * Math.PI * (disableMotion ? 0 : 0.1);
 	});
 
   return (
@@ -278,6 +307,7 @@ const Capsule = () => {
           <bufferAttribute attach='attributes-debrisSpeed' count={debrisSpeed.length} array={debrisSpeed} itemSize={1} />
           <bufferAttribute attach='index' count={indices.length} array={indices} itemSize={1} />
         </bufferGeometry>
+				{/* <meshNormalMaterial /> */}
         <worldMaterial
           ref={worldMaterial}
           transparent
@@ -479,7 +509,7 @@ const App = () => {
         </Float>
         <OrbitControls />
         <Capsule />
-        <Beyond />
+        {/* <Beyond /> */}
         <Traveller />
       </Canvas>
       <LogoMark />
