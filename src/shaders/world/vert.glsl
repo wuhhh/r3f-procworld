@@ -81,6 +81,18 @@ void main() {
 	vZDistanceFromCamera = distance(debrisTravel.z, cameraPosition.z) / uDepth; 
 
 	// Traveller distance
+
+	// TODO:
+	// Calculate proximity here not in the fragment shader
+	// Once you have proximity in 0 - 1 range, you can use it to
+	// make something like a uv map for the vertices which are in range 
+
+	// You will know the maximum possible distance from the current position 
+	// is current position + proximity. 
+
+	// So you map this value from -1 to 1 and use it to offset the positions
+	// This is how you finesse the alpha mask produced by the fragment shader
+
 	vec4 travellerWorldPos = projectionMatrix * modelViewMatrix * vec4(uTravellerPos.xyz, 1.0);
 	vec4 postWorldPos = modelMatrix * vec4(postPos.xyz, 1.0);
 	// postWorldPos.z *= (1.0 - pow(vUv.y, 32.0)) * .5;
