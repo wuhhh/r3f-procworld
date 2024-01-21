@@ -28,8 +28,8 @@ export const Model = forwardRef((props, ref) => {
 	);
 
 	const boostEmissionMaterial = new BoostEmissionMaterial({
-		transparent: true,
 		side: DoubleSide,
+		transparent: true,
 	});
 		
 	useFrame(({ clock }) => {

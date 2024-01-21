@@ -83,6 +83,8 @@ void main() {
 	// Traveller distance
 	vec4 travellerWorldPos = projectionMatrix * modelViewMatrix * vec4(uTravellerPos.xyz, 1.0);
 	vec4 postWorldPos = modelMatrix * vec4(postPos.xyz, 1.0);
+	// postWorldPos.z *= (1.0 - pow(vUv.y, 32.0)) * .5;
+	// postWorldPos.z += .5;
 	float travellerDistance = distance(uTravellerPos.xyz, postWorldPos.xyz);
 	vTravellerDistance = travellerDistance;
 

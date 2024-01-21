@@ -45,7 +45,7 @@ void main() {
 	// Brighter version of main colour
 	vec3 brighter = brightnessContrast(base, .2, 1.); 
 
-	//  Periodic noise (wraps seamlessly around tubes, spheres etc.)
+	//  Clouds from periodic noise (wraps seamlessly around tubes, spheres etc.)
 	float noise = psrdnoise(vec3(uv.x, uv.y, uTime * .1), vec3(xp, yp, 0.)); 
 
 	// Alpha feathering
@@ -79,7 +79,8 @@ void main() {
 	// vec4 travellerColour = vec4(brighter, travellerProximity);
 
 	// Post 
-	vec4 postColour = mix(mix(terrainCloudMix, debrisColour, vLevel.x), vec4(uCapsuleColourFar, 1.0), travellerProximity * vLevel.y);
+	// vec4 postColour = mix(mix(terrainCloudMix, debrisColour, vLevel.x), vec4(brighter, 1.), pow(travellerProximity * vLevel.y, 2.0));
+	vec4 postColour = mix(vec4(0.0, 0.0, 0.0, 0.0), mix(terrainCloudMix, debrisColour, vLevel.x), 1.0 - travellerProximity);
 	
 	gl_FragColor = postColour;
 	// gl_FragColor = vec4(vUv.x, vUv.y, 0., 1.);

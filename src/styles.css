@@ -9,7 +9,8 @@ body,
   height: 100%;
   margin: 0;
   padding: 0;
-  background-color: #ff7f91;
+  background-color: black;
+  /* background-color: #ff7f91; */
   -webkit-touch-callout: none;
   -webkit-user-select: none;
   -khtml-user-select: none;
