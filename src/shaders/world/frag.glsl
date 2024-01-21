@@ -4,6 +4,7 @@ uniform float uDepth;
 uniform vec3 uCapsuleColourFace;
 uniform vec3 uCapsuleColourFar;
 uniform vec3 uCapsuleColourNear;
+uniform vec3 uOutsideColour;
 uniform float uTime;
 
 varying float vElevation;
@@ -77,13 +78,19 @@ void main() {
 	vec4 debrisColour = vec4(1., .8, .7, debrisFog * vDebrisOpacity * smoothstep(.01, .99, 1.0 - (distance(vUv, vec2(.5, .5)) * 4.)) );
 
 	// Traveller proximity
-	float proximityTest = 1.; // Should be a uniform
-	float travellerProximity = vTravellerDistance <= proximityTest ? 1.0 - vTravellerDistance : 0.0;
+	float proximityTest = 1.5; // Should be a uniform
+
+	// This will be 0.0 to proximityTest, with 0.0 being at the farthest point within proximityTest
+	float travellerProximity = vTravellerDistance <= proximityTest ? proximityTest - vTravellerDistance : 0.0; // 0.0 to proximityTest
+
+	// Remap to 1.0 to 0.0
+	travellerProximity = map(travellerProximity, 0.0, proximityTest, 1.0, 0.0);
+	// travellerProximity = pow(travellerProximity, .1);
 	// vec4 travellerColour = vec4(brighter, travellerProximity);
 
 	// Post 
 	// vec4 postColour = mix(mix(terrainCloudMix, debrisColour, vLevel.x), vec4(brighter, 1.), pow(travellerProximity * vLevel.y, 2.0));
-	vec4 postColour = mix(vec4(0.0, 0.0, 0.0, 0.0), mix(terrainCloudMix, debrisColour, vLevel.x), 1.0 - travellerProximity);
+	vec4 postColour = mix(vec4(uOutsideColour, 0.0), mix(terrainCloudMix, debrisColour, vLevel.x), travellerProximity);
 	
 	gl_FragColor = postColour;
 	// gl_FragColor = vec4(vUv.x, vUv.y, 0., 1.);
