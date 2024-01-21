@@ -24,6 +24,7 @@ const WorldMaterial = shaderMaterial(
 		uCapsuleColourFace: null,
     uCapsuleColourFar: null,
     uCapsuleColourNear: null,
+		uOutsideColour: null,
     uDepth: 0.0,
     uRadius: 0.0,
     // uTime: 0.0,
@@ -48,6 +49,7 @@ const Capsule = () => {
 		uCapsuleColourFace: "#ffb6bf",
     uCapsuleColourFar: "#ff4848",
     uCapsuleColourNear: "#00416f",
+		uOutsideColour: "#160b26",
   });
 
   const vertices_ = [];
@@ -310,6 +312,7 @@ const Capsule = () => {
 					uCapsuleColourFace={new Color(worldConf.uCapsuleColourFace)}
           uCapsuleColourFar={new Color(worldConf.uCapsuleColourFar)}
           uCapsuleColourNear={new Color(worldConf.uCapsuleColourNear)}
+					uOutsideColour={new Color(worldConf.uOutsideColour)}
           uDepth={depth}
           uRadius={radius}
           // wireframe
