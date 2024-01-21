@@ -1,6 +1,7 @@
 precision highp float;
 
 uniform float uDepth;
+uniform vec3 uCapsuleColourFace;
 uniform vec3 uCapsuleColourFar;
 uniform vec3 uCapsuleColourNear;
 uniform float uTime;
@@ -40,7 +41,7 @@ void main() {
 	uv.y += uTime * speed;
 
 	// Main colour mix
-	vec3 base = mix(uCapsuleColourNear, uCapsuleColourFar, vUv.y);
+	vec3 base = mix(uCapsuleColourFace, mix(uCapsuleColourNear, uCapsuleColourFar, vUv.y), smoothstep(0.001, 0.1, 1.0 - vUv.y));
 
 	// Brighter version of main colour
 	vec3 brighter = brightnessContrast(base, .2, 1.); 
@@ -51,17 +52,19 @@ void main() {
 	// Alpha feathering
 	float stepWidth = .06;
 	float stepStart = .63;
-	float alpha = smoothstep(stepStart, stepStart + stepWidth, noise); 
+	float noiseAlpha = smoothstep(stepStart, stepStart + stepWidth, noise); 
 
-	// Vary alpha around x
-	alpha *= sin(vUv.x * 16.) * .5 + .5; 
-	alpha *= 1. - pow(vUv.y, 4.0);
+	// Vary noise alpha around x
+	noiseAlpha *= sin(vUv.x * 16.) * .5 + .5; 
+
+	// Fade noise in from far end
+	noiseAlpha *= 1. - pow(vUv.y, 4.0);
 
 	// Mix the base colour with the brighter colour
 	vec3 blend = blendLighten(base, brighter, 1.);
 
 	// Mix between capsule and cloud
-	vec4 terrainCloudMix = mix(vec4(base, 1. - pow(vUv.y, 16.0)), vec4(blend, alpha), vLevel.y);
+	vec4 terrainCloudMix = mix(vec4(base, 1.0), vec4(blend, noiseAlpha), vLevel.y);
 
 	// Add some brighter patches using elevation from the vertex shader, bump contrast
 	terrainCloudMix = brightnessContrast(terrainCloudMix, pow(vElevation, 2.0) * .25, 1.05);

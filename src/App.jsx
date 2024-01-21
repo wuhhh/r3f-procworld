@@ -21,6 +21,7 @@ const tQ = new Quaternion();
 
 const WorldMaterial = shaderMaterial(
   {
+		uCapsuleColourFace: null,
     uCapsuleColourFar: null,
     uCapsuleColourNear: null,
     uDepth: 0.0,
@@ -44,6 +45,7 @@ const Capsule = () => {
   const tubularSegments = 96;
 
   const worldConf = useControls("world", {
+		uCapsuleColourFace: "#ffb6bf",
     uCapsuleColourFar: "#ff4848",
     uCapsuleColourNear: "#00416f",
   });
@@ -202,10 +204,6 @@ const Capsule = () => {
 		const firstSegmentNormals = normals_.slice(0, radialSegments * 3);
 		normals_.push(...firstSegmentNormals);
 
-		// Duplicate the first segment of uvs to create a flat top
-		/* const firstSegmentUvs = uvs_.slice(0, radialSegments * 2);
-		uvs_.push(...firstSegmentUvs); */
-
 		for(let i = 0; i < firstSegment.length / 3; i++) {
 			uvs_.push(1, 1);
 			levels_.push(0, 0, 0);
@@ -248,8 +246,6 @@ const Capsule = () => {
     /**
      * THIRD PASS : Debris layer
      */
-
-    // Generate a plane
 
 		// Test planes
 		// generatePlane(1.0, 1.0, new Vector3(0, 0, 0));
@@ -311,6 +307,7 @@ const Capsule = () => {
         <worldMaterial
           ref={worldMaterial}
           transparent
+					uCapsuleColourFace={new Color(worldConf.uCapsuleColourFace)}
           uCapsuleColourFar={new Color(worldConf.uCapsuleColourFar)}
           uCapsuleColourNear={new Color(worldConf.uCapsuleColourNear)}
           uDepth={depth}
@@ -453,7 +450,7 @@ const Beyond = props => {
 
   useFrame((state, delta) => {
     planetBody.current.material.uniforms.uTime.value += delta;
-    spaceCanvas.current.material.uniforms.uTime.value += delta;
+    // spaceCanvas.current.material.uniforms.uTime.value += delta;
   });
 
   const SpaceCanvasMaterial = shaderMaterial(
@@ -478,10 +475,10 @@ const Beyond = props => {
 
   return (
     <>
-      <mesh ref={spaceCanvas} scale={[18, 20, 1]} position={[0, 1, -13]} material={spaceCanvasMaterial}>
+     	{/* <mesh ref={spaceCanvas} scale={[18, 20, 1]} position={[0, 1, -13]} material={spaceCanvasMaterial}>
         <planeGeometry args={[1, 1]} />
-      </mesh>
-      <mesh ref={planetBody} scale={[0.7, 0.7, 0.7]} position={[-2, 3, -10]}>
+      </mesh> */}
+      <mesh ref={planetBody} scale={[.5, .5, .5]} position={[-.8, 1.5, -3.499]}>
         <sphereGeometry args={[1, 32, 32]} />
         <shaderMaterial
           uniforms={{
@@ -509,7 +506,7 @@ const App = () => {
         </Float>
         <OrbitControls />
         <Capsule />
-        {/* <Beyond /> */}
+        <Beyond />
         <Traveller />
       </Canvas>
       <LogoMark />
