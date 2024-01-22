@@ -293,7 +293,7 @@ const Capsule = () => {
 
   return (
     <>
-      <mesh ref={capsule} position={[0, 1, 0]}>
+      <mesh renderOrder={2} ref={capsule} position={[0, 1, 0]}>
         <bufferGeometry>
           <bufferAttribute attach='attributes-position' count={vertices.length / 3} array={vertices} itemSize={3} />
           <bufferAttribute attach='attributes-normal' count={normals.length / 3} array={normals} itemSize={3} />
