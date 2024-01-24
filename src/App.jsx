@@ -1,6 +1,6 @@
-import { createContext, useContext, useMemo, useRef } from "react";
+import { useMemo, useRef } from "react";
 import { Canvas, extend, useFrame } from "@react-three/fiber";
-import { Float, OrbitControls, PerspectiveCamera, shaderMaterial } from "@react-three/drei";
+import { Float, PerspectiveCamera, shaderMaterial } from "@react-three/drei";
 import { BackSide, Color, Euler, MathUtils, PlaneGeometry, Quaternion, Vector3 } from "three";
 import { Leva, useControls } from "leva";
 
@@ -471,7 +471,6 @@ const App = () => {
         <Float speed={disableMotion ? 0 : 2}>
           <PerspectiveCamera makeDefault fov={90} position={[0, 0, 3.9]} />
         </Float>
-        {/* <OrbitControls makeDefault /> */}
         <Capsule />
         <Beyond />
         <Traveller />
