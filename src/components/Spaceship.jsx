@@ -12,7 +12,7 @@ import boostEmissionFragmentShader from "../shaders/boostEmission/frag.glsl";
 import { useFrame } from '@react-three/fiber';
 
 export const Model = forwardRef((props, ref) => {
-  const { nodes, materials } = useGLTF("/spaceship-d4-joined-transformed.glb");
+  const { nodes } = useGLTF("/spaceship-d4-joined-transformed.glb");
   const bakedTexture = useTexture("/textures/spaceship-baked.png");
   const bakedMaterial = new MeshBasicMaterial({ map: bakedTexture });
 

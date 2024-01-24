@@ -5,6 +5,12 @@ import { Vector3 } from "three";
 export default create(
 	subscribeWithSelector(
 		(set, get) => ({
+			// General
+			mouseIsDown: false,
+			setMouseIsDown: (value) => set((state) => ({ mouseIsDown: value })),
+			touchIsDown: false,
+			setTouchIsDown: (value) => set((state) => ({ touchIsDown: value })),
+
 			// Traveller
 			keysDown: {
 				w: false,

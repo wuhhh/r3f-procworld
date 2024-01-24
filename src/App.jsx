@@ -1,4 +1,4 @@
-import { useEffect, useMemo, useRef, useState } from "react";
+import { createContext, useContext, useMemo, useRef } from "react";
 import { Canvas, extend, useFrame } from "@react-three/fiber";
 import { Float, OrbitControls, PerspectiveCamera, shaderMaterial } from "@react-three/drei";
 import { BackSide, Color, Euler, MathUtils, PlaneGeometry, Quaternion, Vector3 } from "three";
@@ -16,6 +16,7 @@ import planetBodyVertexShader from "./shaders/planetBody/vert.glsl";
 import planetBodyFragmentShader from "./shaders/planetBody/frag.glsl";
 import worldVertexShader from "./shaders/world/vert.glsl";
 import worldFragmentShader from "./shaders/world/frag.glsl";
+import Controls from './components/Controls';
 
 const disableMotion = false;
 const tQ = new Quaternion();
@@ -317,7 +318,8 @@ const Capsule = () => {
 const Traveller = () => {
   const t = useRef();
 	const keysDown = useStore(state => state.keysDown);
-	const setKeyDown = useStore(state => state.setKeyDown);
+	const touchIsDown = useStore(state => state.touchIsDown);
+	const mouseIsDown = useStore(state => state.mouseIsDown);
 	const pitchInertia = useStore(state => state.pitchInertia);
 	const setPitchInertia = useStore(state => state.setPitchInertia);
 	const rollInertia = useStore(state => state.rollInertia);
@@ -326,39 +328,6 @@ const Traveller = () => {
 	const setYawInertia = useStore(state => state.setYawInertia);
 	const tPos = useStore(state => state.tPos);
 	const setTPos = useStore(state => state.setTPos);
-
-  useEffect(() => {
-    window.addEventListener("keydown", e => {
-      // Keyboard WASD and arrow keys using key codes
-			if (e.code === "KeyW" || e.code === "ArrowUp") {
-				setKeyDown('w', true);
-			}
-			if (e.code === "KeyA" || e.code === "ArrowLeft") {
-				setKeyDown('a', true);
-			}
-			if (e.code === "KeyS" || e.code === "ArrowDown") {
-				setKeyDown('s', true);
-			}
-			if (e.code === "KeyD" || e.code === "ArrowRight") {
-				setKeyDown('d', true);
-			}
-    });
-
-    window.addEventListener("keyup", e => {
-			if (e.code === "KeyW" || e.code === "ArrowUp") {
-				setKeyDown('w', false);
-			}
-			if (e.code === "KeyA" || e.code === "ArrowLeft") {
-				setKeyDown('a', false);
-			}
-			if (e.code === "KeyS" || e.code === "ArrowDown") {
-				setKeyDown('s', false);
-			}
-			if (e.code === "KeyD" || e.code === "ArrowRight") {
-				setKeyDown('d', false);
-			}
-    });
-  }, []);
 
   useFrame((_, delta) => {
     // Clamp delta
@@ -389,12 +358,12 @@ const Traveller = () => {
 		}
 
     // Self-righting
-		if (!keysDown.w && !keysDown.s) {
+		if (!keysDown.w && !keysDown.s && !mouseIsDown && !touchIsDown) {
       setPitchInertia(MathUtils.lerp(pitchInertia, 0, delta * 1.1));
       t.current.rotation.x = MathUtils.lerp(t.current.rotation.x, 0, delta * 1.1);
     }
 
-		if (!keysDown.a && !keysDown.d) {
+		if (!keysDown.a && !keysDown.d && !mouseIsDown && !touchIsDown) {
       setRollInertia(MathUtils.lerp(rollInertia, 0, delta * 1.1));
       setYawInertia(MathUtils.lerp(yawInertia, 0, delta * 1.1));
       t.current.rotation.z = MathUtils.lerp(t.current.rotation.z, 0, delta * 1.1);
@@ -502,11 +471,12 @@ const App = () => {
         <Float speed={disableMotion ? 0 : 2}>
           <PerspectiveCamera makeDefault fov={90} position={[0, 0, 3.9]} />
         </Float>
-        <OrbitControls />
+        {/* <OrbitControls makeDefault /> */}
         <Capsule />
         <Beyond />
         <Traveller />
       </Canvas>
+			<Controls />
       <LogoMark />
       {/* <Story /> */}
     </>
