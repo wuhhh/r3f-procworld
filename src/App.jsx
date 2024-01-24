@@ -1,19 +1,19 @@
 import { useEffect, useMemo, useRef, useState } from "react";
 import { Canvas, extend, useFrame } from "@react-three/fiber";
 import { Float, OrbitControls, PerspectiveCamera, shaderMaterial } from "@react-three/drei";
-import { Color, Euler, MathUtils, PlaneGeometry, Quaternion, Vector3 } from "three";
+import { BackSide, Color, Euler, MathUtils, PlaneGeometry, Quaternion, Vector3 } from "three";
 import { Leva, useControls } from "leva";
 
 import LogoMark from "./components/LogoMark";
 import { Model } from "./components/Spaceship";
 import Story from "./components/Story";
 
-import worldVertexShader from "./shaders/world/vert.glsl";
-import worldFragmentShader from "./shaders/world/frag.glsl";
+import outsideVertexShader from "./shaders/outside/vert.glsl";
+import outsideFragmentShader from "./shaders/outside/frag.glsl";
 import planetBodyVertexShader from "./shaders/planetBody/vert.glsl";
 import planetBodyFragmentShader from "./shaders/planetBody/frag.glsl";
-// import spaceCanvasVertexShader from "./shaders/spaceCanvas/vert.glsl";
-import spaceCanvasFragmentShader from "./shaders/spaceCanvas/frag.glsl";
+import worldVertexShader from "./shaders/world/vert.glsl";
+import worldFragmentShader from "./shaders/world/frag.glsl";
 
 const disableMotion = false;
 const tPos = new Vector3();
@@ -249,15 +249,6 @@ const Capsule = () => {
      * THIRD PASS : Debris layer
      */
 
-		// Test planes
-		// generatePlane(1.0, 1.0, new Vector3(0, 0, 0));
-		// generatePlane(1.0, 1.0, new Vector3(0, 0, -1));
-		// generatePlane(1.0, 1.0, new Vector3(0, 0, -2));
-		// generatePlane(1.0, 1.0, new Vector3(0, 0, -3));
-		// generatePlane(1.0, 1.0, new Vector3(0, 0, 1));
-		// generatePlane(1.0, 1.0, new Vector3(0, 0, 2));
-		// generatePlane(1.0, 1.0, new Vector3(0, 0, 3));
-
 		// Smol planes
 		for(let i = 0; i < 20; i++) {
 			generatePlane(.1, .1, new Vector3(Math.random() * 4 - 2, Math.random() * 4 - 2, Math.random() * depth - depth * 0.5));
@@ -288,7 +279,7 @@ const Capsule = () => {
   useFrame((_, delta) => {
     worldMaterial.current.uniforms.uTime.value += delta * (disableMotion ? 0 : 1);
 		worldMaterial.current.uniforms.uTravellerPos.value = tPos;
-    // capsule.current.rotation.z = Math.PI * 0.5 + Math.sin(_.clock.elapsedTime * 0.001) * Math.PI * (disableMotion ? 0 : 0.1);
+    capsule.current.rotation.z = Math.PI * 0.5 + Math.sin(_.clock.elapsedTime * 0.001) * Math.PI * (disableMotion ? 0 : 0.1);
 	});
 
   return (
@@ -305,7 +296,6 @@ const Capsule = () => {
           <bufferAttribute attach='attributes-debrisSpeed' count={debrisSpeed.length} array={debrisSpeed} itemSize={1} />
           <bufferAttribute attach='index' count={indices.length} array={indices} itemSize={1} />
         </bufferGeometry>
-				{/* <meshNormalMaterial /> */}
         <worldMaterial
           ref={worldMaterial}
           transparent
@@ -441,46 +431,51 @@ const Traveller = () => {
 };
 
 const Beyond = props => {
+	const outside = useRef();
   const planetBody = useRef();
-  const spaceCanvas = useRef();
 
-  const conf = useControls("beyond", {
-    spaceCanvasColour: "#ffbcbc",
-    spaceCanvasColour1: "#ffc2c2",
-    spaceCanvasColour2: "#00416f",
-    spaceCanvasColour3: "#90e010",
-  });
+	const OutsideMaterial = new shaderMaterial(
+		{
+			uBaseColour: null,
+			uColor1: null,
+			uColor2: null,
+			uTime: Math.random() * 999,
+		},
+		outsideVertexShader,
+		outsideFragmentShader
+	);
 
-  useFrame((state, delta) => {
+	extend({ OutsideMaterial });
+
+  useFrame((_, delta) => {
+		outside.current.material.uniforms.uTime.value += delta;
     planetBody.current.material.uniforms.uTime.value += delta;
-    // spaceCanvas.current.material.uniforms.uTime.value += delta;
   });
 
-  const SpaceCanvasMaterial = shaderMaterial(
-    {
-      uColor: new Color(conf.spaceCanvasColour),
-      uColor1: new Color(conf.spaceCanvasColour1),
-      uColor2: new Color(conf.spaceCanvasColour2),
-      uColor3: new Color(conf.spaceCanvasColour3),
-      uTime: Math.random() * 999,
-    },
-    `
-			varying vec2 vUv;
-			void main() {
-				vUv = uv;
-				gl_Position = projectionMatrix * modelViewMatrix * vec4(position, 1.0);
-			}
-		`,
-    spaceCanvasFragmentShader
-  );
-
-  const spaceCanvasMaterial = new SpaceCanvasMaterial();
+	const outsideConf = useControls("outside", {
+		sphereScale: 5,
+		sphereBaseColour: "black",
+		sphereColour1: "orange",
+		sphereColour2: "cyan",
+	});
 
   return (
     <>
-     	{/* <mesh ref={spaceCanvas} scale={[18, 20, 1]} position={[0, 1, -13]} material={spaceCanvasMaterial}>
-        <planeGeometry args={[1, 1]} />
-      </mesh> */}
+			<mesh 
+				position={[0, 1, 0]}
+				ref={outside} 
+				scale={[outsideConf.sphereScale, outsideConf.sphereScale, outsideConf.sphereScale]}
+			>
+				<sphereGeometry args={[1, 32, 32]} />
+				<outsideMaterial
+					uBaseColour={new Color(outsideConf.sphereBaseColour)}
+					uColor1={new Color(outsideConf.sphereColour1)}
+					uColor2={new Color(outsideConf.sphereColour2)}
+					side={BackSide}
+					transparent
+					// wireframe
+				/>
+			</mesh>
       <mesh ref={planetBody} scale={[.5, .5, .5]} position={[-.8, 1.5, -3.499]}>
         <sphereGeometry args={[1, 32, 32]} />
         <shaderMaterial
@@ -491,10 +486,6 @@ const Beyond = props => {
           fragmentShader={planetBodyFragmentShader}
         />
       </mesh>
-      {/* <mesh scale={[.7, .7, .7]} position={[-2, 3, -10]} rotation={[Math.PI * .66, -Math.PI * .2, 0]}>
-			<ringGeometry args={[1.2, 1.6, 32]} />
-			<meshBasicMaterial color="red" side={DoubleSide} />
-		</mesh> */}
     </>
   );
 };
@@ -503,7 +494,7 @@ const App = () => {
   return (
     <>
       <Canvas flat linear>
-        <Leva hidden />
+        {/* <Leva hidden /> */}
         <Float speed={disableMotion ? 0 : 2}>
           <PerspectiveCamera makeDefault fov={90} position={[0, 0, 3.9]} />
         </Float>
