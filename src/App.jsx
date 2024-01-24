@@ -8,6 +8,8 @@ import LogoMark from "./components/LogoMark";
 import { Model } from "./components/Spaceship";
 import Story from "./components/Story";
 
+import useStore from "./stores/useStore";
+
 import outsideVertexShader from "./shaders/outside/vert.glsl";
 import outsideFragmentShader from "./shaders/outside/frag.glsl";
 import planetBodyVertexShader from "./shaders/planetBody/vert.glsl";
@@ -16,7 +18,6 @@ import worldVertexShader from "./shaders/world/vert.glsl";
 import worldFragmentShader from "./shaders/world/frag.glsl";
 
 const disableMotion = false;
-const tPos = new Vector3();
 const tQ = new Quaternion();
 
 const WorldMaterial = shaderMaterial(
@@ -38,6 +39,7 @@ const WorldMaterial = shaderMaterial(
 extend({ WorldMaterial });
 
 const Capsule = () => {
+	const tPos = useStore(state => state.tPos);
   const capsule = useRef();
   const worldMaterial = useRef();
   const radius = 2.0;
@@ -314,80 +316,85 @@ const Capsule = () => {
 
 const Traveller = () => {
   const t = useRef();
-  const keysDown = useRef({ w: false, a: false, s: false, d: false });
+	const keysDown = useStore(state => state.keysDown);
+	const setKeyDown = useStore(state => state.setKeyDown);
+	const pitchInertia = useStore(state => state.pitchInertia);
+	const setPitchInertia = useStore(state => state.setPitchInertia);
+	const rollInertia = useStore(state => state.rollInertia);
+	const setRollInertia = useStore(state => state.setRollInertia);
+	const yawInertia = useStore(state => state.yawInertia);
+	const setYawInertia = useStore(state => state.setYawInertia);
+	const tPos = useStore(state => state.tPos);
+	const setTPos = useStore(state => state.setTPos);
 
   useEffect(() => {
     window.addEventListener("keydown", e => {
       // Keyboard WASD and arrow keys using key codes
-      if (e.code === "KeyS" || e.code === "ArrowDown") {
-        keysDown.current.s = true;
-      }
-      if (e.code === "KeyW" || e.code === "ArrowUp") {
-        keysDown.current.w = true;
-      }
-      if (e.code === "KeyA" || e.code === "ArrowLeft") {
-        keysDown.current.a = true;
-      }
-      if (e.code === "KeyD" || e.code === "ArrowRight") {
-        keysDown.current.d = true;
-      }
+			if (e.code === "KeyW" || e.code === "ArrowUp") {
+				setKeyDown('w', true);
+			}
+			if (e.code === "KeyA" || e.code === "ArrowLeft") {
+				setKeyDown('a', true);
+			}
+			if (e.code === "KeyS" || e.code === "ArrowDown") {
+				setKeyDown('s', true);
+			}
+			if (e.code === "KeyD" || e.code === "ArrowRight") {
+				setKeyDown('d', true);
+			}
     });
 
     window.addEventListener("keyup", e => {
-      if (e.code === "KeyS" || e.code === "ArrowDown") {
-        keysDown.current.s = false;
-      }
-      if (e.code === "KeyW" || e.code === "ArrowUp") {
-        keysDown.current.w = false;
-      }
-      if (e.code === "KeyA" || e.code === "ArrowLeft") {
-        keysDown.current.a = false;
-      }
-      if (e.code === "KeyD" || e.code === "ArrowRight") {
-        keysDown.current.d = false;
-      }
+			if (e.code === "KeyW" || e.code === "ArrowUp") {
+				setKeyDown('w', false);
+			}
+			if (e.code === "KeyA" || e.code === "ArrowLeft") {
+				setKeyDown('a', false);
+			}
+			if (e.code === "KeyS" || e.code === "ArrowDown") {
+				setKeyDown('s', false);
+			}
+			if (e.code === "KeyD" || e.code === "ArrowRight") {
+				setKeyDown('d', false);
+			}
     });
   }, []);
 
-  const [pitchInertia, setPitchInertia] = useState(0);
-  const [rollInertia, setRollInertia] = useState(0);
-  const [yawInertia, setYawInertia] = useState(0);
-
-  useFrame((state, delta) => {
+  useFrame((_, delta) => {
     // Clamp delta
     delta = Math.min(delta, 0.1);
 
     // Loop through keysDown and update position with inertia
 
 		// Up
-    if (keysDown.current.w) {
-      setPitchInertia(pitchInertia <= -50 ? -50 : pitchInertia - delta * 8);
-    }
+		if(keysDown.w) {
+			setPitchInertia(pitchInertia <= -50 ? -50 : pitchInertia - delta * 8);
+		}
 
 		// Down
-    if (keysDown.current.s) {
-      setPitchInertia(pitchInertia >= 50 ? 50 : pitchInertia + delta * 8);
-    }
+		if(keysDown.s) {
+			setPitchInertia(pitchInertia >= 50 ? 50 : pitchInertia + delta * 8);
+		}
 
 		// Left
-    if (keysDown.current.a) {
-      setRollInertia(rollInertia >= 35 ? 35 : rollInertia + delta * 80);
-      setYawInertia(yawInertia >= 35 ? 35 : yawInertia + delta * 80);
-    }
+		if(keysDown.a) {
+			setRollInertia(rollInertia >= 35 ? 35 : rollInertia + delta * 80);
+			setYawInertia(yawInertia >= 35 ? 35 : yawInertia + delta * 80);
+		}
 
 		// Right
-    if (keysDown.current.d) {
-      setRollInertia(rollInertia <= -35 ? -35 : rollInertia - delta * 80);
-      setYawInertia(yawInertia <= -35 ? -35 : yawInertia - delta * 80);
-    }
+		if(keysDown.d) {
+			setRollInertia(rollInertia <= -35 ? -35 : rollInertia - delta * 80);
+			setYawInertia(yawInertia <= -35 ? -35 : yawInertia - delta * 80);
+		}
 
     // Self-righting
-    if (!keysDown.current.w && !keysDown.current.s) {
+		if (!keysDown.w && !keysDown.s) {
       setPitchInertia(MathUtils.lerp(pitchInertia, 0, delta * 1.1));
       t.current.rotation.x = MathUtils.lerp(t.current.rotation.x, 0, delta * 1.1);
     }
 
-    if (!keysDown.current.a && !keysDown.current.d) {
+		if (!keysDown.a && !keysDown.d) {
       setRollInertia(MathUtils.lerp(rollInertia, 0, delta * 1.1));
       setYawInertia(MathUtils.lerp(yawInertia, 0, delta * 1.1));
       t.current.rotation.z = MathUtils.lerp(t.current.rotation.z, 0, delta * 1.1);
@@ -397,9 +404,6 @@ const Traveller = () => {
     // Update rotation
     tQ.setFromEuler(new Euler(pitchInertia * delta * 0.25, yawInertia * delta * 0.005, rollInertia * delta * 0.025, "XYZ"));
     t.current.quaternion.multiplyQuaternions(tQ, t.current.quaternion);
-    // t.current.rotation.x += pitchInertia * delta * 0.1;
-    // t.current.rotation.z += rollInertia * delta * 0.01;
-    // t.current.rotation.y += yawInertia * delta * 0.005;
 
     // Update position
     t.current.position.y += t.current.rotation.x * delta * 2.4;
@@ -424,7 +428,7 @@ const Traveller = () => {
     // t.current.position.z += t.current.rotation.x * delta_ * 0.6;
 
 		// Update traveller position
-		tPos.setFromMatrixPosition(t.current.matrixWorld);
+		setTPos(tPos.setFromMatrixPosition(t.current.matrixWorld));
   });
 
   return <Model ref={t} scale={[0.05, 0.05, 0.05]} position={[0.5, -0.2, 2]} />;
@@ -494,7 +498,7 @@ const App = () => {
   return (
     <>
       <Canvas flat linear>
-        {/* <Leva hidden /> */}
+        <Leva hidden />
         <Float speed={disableMotion ? 0 : 2}>
           <PerspectiveCamera makeDefault fov={90} position={[0, 0, 3.9]} />
         </Float>
