@@ -2,19 +2,19 @@ import { useEffect, useLayoutEffect, useRef, useState } from "react";
 
 export default function Story() {
   const config = {
-    lineDelay: 25, // in seconds
-    charDelay: 0.05, // in seconds
+    lineDelay: 30, // in seconds
+    charDelayMin: 0.05, // in seconds
+    charDelayMax: 1, // in seconds
     story: [
       <>Where are we?</>,
       <>We must be inside some kind of nebula</>,
       <>I've been flying for so long.</>,
       <>Where are we? Something must have happened...</>,
-      <>It feels like so long since comms died</>,
+      <>It's been so long since we lost contact</>,
       <>Do you think that could be Earth?</>,
       <>Do you remember the smell of the ocean?</>,
       <>Time feels different here...</>,
-      <>The French have a saying, "chasser des chimères"</>,
-      <>What were the clouds like when you were young?</>,
+      <>What were the skies like when you were young?</>,
       <>When did you last feel the sun on your skin?</>,
     ],
   };
@@ -31,6 +31,12 @@ export default function Story() {
   const [storyIndex, setStoryIndex] = useState(null);
 
   const [story, setStory] = useState(config.story);
+
+  const cursor = document.createElement("span");
+  cursor.className = "ignore animate-blink";
+  cursor.innerHTML = "&#9612;";
+
+  console.log(cursor);
 
   /**
    * Wrap characters in spans
@@ -58,7 +64,7 @@ export default function Story() {
     storyIndex_.current = storyIndex;
     setTimeout(() => {
       render();
-    }, 1000 * 5);
+    }, 0);
   }, []);
 
   // Set current line element
@@ -71,7 +77,9 @@ export default function Story() {
     }
 
     if (lineElement.current) {
-      const span = lineElement.current.querySelectorAll("span");
+      // match all except .ignore
+      const span = lineElement.current.querySelectorAll("span:not(.ignore)");
+      // const span = lineElement.current.querySelectorAll("span");
       span.forEach(el => {
         el.style.visibility = "hidden";
       });
@@ -82,6 +90,8 @@ export default function Story() {
    * Render loop
    */
   const render = () => {
+    let charDelay = Math.random() * (config.charDelayMax - config.charDelayMin) + config.charDelayMin;
+
     // Calculate time and delta
     time.current = performance.now() / 1000;
     delta.current = time.current - prevTime.current;
@@ -94,14 +104,21 @@ export default function Story() {
     }
 
     // Typewriter effect by toggling visibility of spans
-    if (charTimer.current >= config.charDelay && lineElement.current) {
+    if (charTimer.current >= charDelay && lineElement.current) {
       charTimer.current = 0; // Reset char timer
 
-      const span = lineElement.current.querySelectorAll("span");
+      const span = lineElement.current.querySelectorAll("span:not(.ignore)");
 
       if (charIndex.current < span.length) {
+        // span[charIndex.current].classList.remove("bg-almost-white/80");
+
         span[charIndex.current].style.visibility = "visible";
         charIndex.current++;
+      }
+
+      if (charIndex.current + 1 <= span.length) {
+        span[charIndex.current].appendChild(cursor);
+        span[charIndex.current].style.visibility = "visible";
       }
     }
 
@@ -119,7 +136,7 @@ export default function Story() {
         {story.map((line, i) => (
           <div key={i} className={storyIndex === i ? "block is-current-line" : "hidden"}>
             <span>{line}</span>
-            <span className='animate-blink'>&#9612;</span>
+            {/* <span className='animate-blink'>&#9612;</span> */}
           </div>
         ))}
       </div>
