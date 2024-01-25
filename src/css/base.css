@@ -14,6 +14,14 @@ body {
   @apply fixed font-mono overflow-hidden overscroll-y-none antialiased;
 }
 
+.story-line {
+  @apply flex gap-x-1 font-mono text-sm text-almost-white/80 px-4 pb-32 leading-normal;
+
+  @screen md {
+    @apply font-bold text-base pb-24;
+  }
+}
+
 .logomark {
   @apply absolute bottom-[26px] left-[26px] w-[26px] h-[26px];
 }

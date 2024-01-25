@@ -1,33 +1,34 @@
 import { useEffect, useLayoutEffect, useRef, useState } from "react";
 
 export default function Story() {
+  const config = {
+    lineDelay: 25, // in seconds
+    charDelay: 0.05, // in seconds
+    story: [
+      <>Where are we?</>,
+      <>We must be inside some kind of nebula</>,
+      <>I've been flying for so long.</>,
+      <>Where are we? Something must have happened...</>,
+      <>It feels like so long since comms died</>,
+      <>Do you think that could be Earth?</>,
+      <>Do you remember the smell of the ocean?</>,
+      <>Time feels different here...</>,
+      <>The French have a saying, "chasser des chimères"</>,
+      <>What were the clouds like when you were young?</>,
+      <>When did you last feel the sun on your skin?</>,
+    ],
+  };
+
   const time = useRef(performance.now() / 1000); // in ms
   const prevTime = useRef(time.current / 1000); // in ms
   const delta = useRef(0);
   const charIndex = useRef(0);
-  const storyIndex_ = useRef(0);
+  const storyIndex_ = useRef();
 
   const lineTimer = useRef(0);
   const charTimer = useRef(0);
   const lineElement = useRef(null);
   const [storyIndex, setStoryIndex] = useState(null);
-
-  const config = {
-    lineDelay: 30, // in seconds
-    charDelay: 0.05, // in seconds
-    story: [
-      <div>The French have a saying, "chasser des chimères"</div>,
-      <div>We must be inside some kind of nebula</div>,
-      <div>I've been flying for so long.</div>,
-      <div>Where are we? Something must have happened...</div>,
-      <div>There were voices, but they went quiet a long time ago.</div>,
-      <div>Do you think that could be Earth?</div>,
-      <div>Do you remember the smell of the ocean?</div>,
-      <div>Time feels different here...</div>,
-      <div>What were the clouds like when you were young?</div>,
-      <div>When did you last feel the sun on your skin?</div>,
-    ],
-  };
 
   const [story, setStory] = useState(config.story);
 
@@ -43,7 +44,7 @@ export default function Story() {
         let char = line.props.children[j];
         wrappedLine.push(<span key={j}>{char}</span>);
       }
-      temp.push(<div>{wrappedLine}</div>);
+      temp.push(<>{wrappedLine}</>);
     }
     setStory(temp);
   };
@@ -53,8 +54,11 @@ export default function Story() {
   // Initial setup
   useEffect(() => {
     wrapCharacters();
-    render();
-    setStoryIndex(0);
+    setStoryIndex(Math.floor(Math.random() * story.length));
+    storyIndex_.current = storyIndex;
+    setTimeout(() => {
+      render();
+    }, 1000 * 5);
   }, []);
 
   // Set current line element
@@ -111,10 +115,11 @@ export default function Story() {
 
   return (
     <div className='absolute inset-0 flex items-end justify-center text-center pointer-events-none'>
-      <div ref={storyEl} className='flex gap-x-1 font-mono font-bold text-white pb-16 leading-normal'>
+      <div ref={storyEl} className='story-line'>
         {story.map((line, i) => (
           <div key={i} className={storyIndex === i ? "block is-current-line" : "hidden"}>
-            {line}
+            <span>{line}</span>
+            <span className='animate-blink'>&#9612;</span>
           </div>
         ))}
       </div>
