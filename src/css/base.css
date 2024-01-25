@@ -15,7 +15,7 @@ body {
 }
 
 .story-line {
-  @apply flex gap-x-1 font-mono text-sm text-almost-white/80 px-4 pb-32 leading-normal;
+  @apply flex gap-x-1 font-mono text-sm text-almost-white/80 max-w-[75%] px-4 pb-32 leading-normal;
 
   @screen md {
     @apply font-bold text-base pb-24;
