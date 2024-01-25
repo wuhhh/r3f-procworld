@@ -3,7 +3,7 @@ import IconTick from "./svg/IconTick";
 export default function CheckboxSetting(props) {
   return (
     <label htmlFor={props.id} className='cursor-pointer flex items-center gap-x-2 '>
-      <div className='w-[18px] aspect-square relative focus-within:outline focus-within:outline-2 focus-within:outline-offset-2 focus-within:outline-yellow-300'>
+      <div className='w-[18px] aspect-square relative [&:has(:focus-visible)]:outline [&:has(:focus-visible)]:outline-2 [&:has(:focus-visible)]:outline-offset-2 [&:has(:focus-visible)]:outline-yellow-300'>
         <input
           type='checkbox'
           name={props.name}
