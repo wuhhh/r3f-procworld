@@ -1,41 +1,10 @@
-@tailwind base;
-@tailwind components;
-@tailwind utilities;
+/* base */
+@import "tailwindcss/base";
+@import "/src/css/fonts.css";
+@import "/src/css/base.css";
 
-@font-face {
-	font-family: "ballingermono";
-	font-style: normal;
-	font-weight: 400;
-	font-display: swap;
-	src: url("/fonts/ballinger-mono/ballingermono-regular.woff2") format("woff2"),
-		url("/fonts/ballinger-mono/ballingermono-regular.woff") format("woff");
-}
+/* components */
+@import "tailwindcss/components";
 
-@font-face {
-	font-family: "ballingermono";
-	font-style: normal;
-	font-weight: 700;
-	font-display: swap;
-	src: url("/fonts/ballinger-mono/ballingermono-bold.woff2") format("woff2"),
-		url("/fonts/ballinger-mono/ballingermono-bold.woff") format("woff");
-}
-
-html,
-body,
-#root {
-	@apply w-full h-full select-none overflow-hidden;
-  background-color: #160b26;
-  -webkit-touch-callout: none;
-}
-
-#root {
-  overflow: auto;
-}
-
-body {
-	@apply fixed font-mono overflow-hidden overscroll-y-none antialiased;
-}
-
-.logomark {
-  @apply absolute bottom-[26px] left-[26px] w-[26px] h-[26px];
-}
+/* utilities */
+@import "tailwindcss/utilities";

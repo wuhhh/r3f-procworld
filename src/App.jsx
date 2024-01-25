@@ -477,9 +477,9 @@ const App = () => {
         <Beyond />
         <Traveller />
       </Canvas>
+      <LogoMark />
 			<Settings />
 			<Controls />
-      <LogoMark />
       {/* <Story /> */}
     </>
   );

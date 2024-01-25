@@ -26,8 +26,14 @@ export default create(
           return { invertY: newInvertY };
         });
       },
-			mute: false,
-			setMute: (value) => set((state) => ({ mute: value })),
+			muted: getLocalStorageValue("muted", false),
+			toggleMuted: () => {
+        set((state) => {
+          const newMuted = !state.muted;
+          localStorage.setItem("muted", JSON.stringify(newMuted));
+          return { muted: newMuted };
+        });
+      },
 
 			// Traveller
 			keysDown: {

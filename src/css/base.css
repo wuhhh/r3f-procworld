@@ -1,0 +1,31 @@
+html,
+body,
+#root {
+  @apply w-full h-full select-none overflow-hidden;
+  background-color: #160b26;
+  -webkit-touch-callout: none;
+}
+
+#root {
+  overflow: auto;
+}
+
+body {
+  @apply fixed font-mono overflow-hidden overscroll-y-none antialiased;
+}
+
+.logomark {
+  @apply absolute bottom-[26px] left-[26px] w-[26px] h-[26px];
+}
+
+.settings {
+  @apply absolute w-full pt-8 px-8 pb-12 bg-spaceship-black/65 backdrop-blur-lg border border-cloud-pink text-cloud-pink left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2;
+
+  @screen sm {
+    @apply top-auto right-0 bottom-[75px] left-auto translate-x-0 translate-y-0 mx-0 max-w-[347px];
+  }
+
+  .settings__heading {
+    @apply text-lg font-bold pb-4 border-b border-b-cloud-pink border-dashed mb-4;
+  }
+}
