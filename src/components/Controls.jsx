@@ -15,6 +15,13 @@ export default function Controls(props) {
   const setKeyDown = useStore(state => state.setKeyDown);
   const setPitchInertia = useStore(state => state.setPitchInertia);
   const setRollInertia = useStore(state => state.setRollInertia);
+	const invertY = useStore(state => state.invertY);
+	const invertY_ = useRef(false);
+
+	// Local state for invertY
+	useEffect(() => {
+		invertY_.current = invertY;
+	}, [invertY]);
 
   // Keyboard controls
   useEffect(() => {
@@ -52,7 +59,7 @@ export default function Controls(props) {
 
   const handleStart = e => {
     // e.preventDefault();
-    setLog(e.type);
+    // setLog(e.type);
 
     if (e.type === "mousedown") {
       mouseIsDown_.current = true;
@@ -92,7 +99,7 @@ export default function Controls(props) {
 
   const handleMove = e => {
     // e.preventDefault();
-    setLog(e.type);
+    // setLog(e.type);
 
     let x, y;
 
@@ -113,7 +120,8 @@ export default function Controls(props) {
     dy = dy / 100;
 
     if ((e.type === "mousemove" && mouseIsDown_.current) || e.type === "touchmove") {
-      setPitchInertia(dy);
+			console.log(invertY_.current);
+      setPitchInertia(invertY_.current ? dy : -dy);
       setRollInertia(-dx);
       setLog(`e.type: ${e.type}, dx: ${dx}, dy: ${dy}`);
     }
