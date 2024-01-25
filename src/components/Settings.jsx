@@ -14,6 +14,12 @@ export default function Settings(props) {
   const settingsRef = useRef(null);
 
   useEffect(() => {
+    window.addEventListener("keydown", event => {
+      if (event.key === "Escape") {
+        setShowSettings(false);
+      }
+    });
+
     function handleClickOutside(event) {
       if (
         settingsRef.current &&
