@@ -9,47 +9,47 @@ import { folder, useControls } from "leva";
 
 import boostEmissionVertexShader from "../shaders/boostEmission/vert.glsl";
 import boostEmissionFragmentShader from "../shaders/boostEmission/frag.glsl";
-import { useFrame } from '@react-three/fiber';
+import { useFrame } from "@react-three/fiber";
 
 export const Model = forwardRef((props, ref) => {
-  const { nodes } = useGLTF("/spaceship-d4-joined-transformed.glb");
+  const { nodes } = useGLTF("/models/spaceship-d4-joined-transformed.glb");
   const bakedTexture = useTexture("/textures/spaceship-baked.png");
   const bakedMaterial = new MeshBasicMaterial({ map: bakedTexture });
 
   bakedTexture.flipY = false;
 
   const BoostEmissionMaterial = shaderMaterial(
-		{
-			uColor: new Color(0xFF7D78),
-			uTime: 0,
-		},
-		boostEmissionVertexShader, 
-		boostEmissionFragmentShader
-	);
+    {
+      uColor: new Color(0xff7d78),
+      uTime: 0,
+    },
+    boostEmissionVertexShader,
+    boostEmissionFragmentShader
+  );
 
-	const boostEmissionMaterial = new BoostEmissionMaterial({
-		side: DoubleSide,
-		transparent: true,
-		depthWrite: false,
-	});
-		
-	useFrame(({ clock }) => {
-		boostEmissionMaterial.uniforms.uTime.value = clock.getElapsedTime();
-	});
+  const boostEmissionMaterial = new BoostEmissionMaterial({
+    side: DoubleSide,
+    transparent: true,
+    depthWrite: false,
+  });
+
+  useFrame(({ clock }) => {
+    boostEmissionMaterial.uniforms.uTime.value = clock.getElapsedTime();
+  });
 
   return (
     <group ref={ref} {...props} dispose={null}>
-			<group rotation={[0, Math.PI, 0]}>
-				<mesh geometry={nodes.body.geometry} material={bakedMaterial} />
-				<mesh geometry={nodes.emissives.geometry} material={nodes.emissives.material} />
-				<mesh geometry={nodes.boostEmission.geometry} material={boostEmissionMaterial} position={[0, -0.03, -2.9]} scale={[1, 1, 2]} />
-			</group>
-		</group>
+      <group rotation={[0, Math.PI, 0]}>
+        <mesh geometry={nodes.body.geometry} material={bakedMaterial} />
+        <mesh geometry={nodes.emissives.geometry} material={nodes.emissives.material} />
+        <mesh geometry={nodes.boostEmission.geometry} material={boostEmissionMaterial} position={[0, -0.03, -2.9]} scale={[1, 1, 2]} />
+      </group>
+    </group>
   );
 });
 
 useTexture.preload("/textures/spaceship-baked-sunlight.png");
 // useTexture.preload('/textures/spaceship-baked.png')
-useGLTF.preload("/spaceship-d4-joined-transformed.glb");
+useGLTF.preload("/models/spaceship-d4-joined-transformed.glb");
 
 export default Model;
