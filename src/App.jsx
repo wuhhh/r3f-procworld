@@ -1,4 +1,4 @@
-import { useMemo, useRef } from "react";
+import { useEffect, useMemo, useRef } from "react";
 import { Canvas, extend, useFrame } from "@react-three/fiber";
 import { Float, PerspectiveCamera, shaderMaterial } from "@react-three/drei";
 import { BackSide, Color, Euler, MathUtils, PlaneGeometry, Quaternion, Vector3 } from "three";
@@ -17,6 +17,7 @@ import planetBodyFragmentShader from "./shaders/planetBody/frag.glsl";
 import worldVertexShader from "./shaders/world/vert.glsl";
 import worldFragmentShader from "./shaders/world/frag.glsl";
 import Controls from './components/Controls';
+import Settings from './components/Settings';
 
 const disableMotion = false;
 const tQ = new Quaternion();
@@ -317,6 +318,7 @@ const Capsule = () => {
 
 const Traveller = () => {
   const t = useRef();
+	const invertY = useStore(state => state.invertY);
 	const keysDown = useStore(state => state.keysDown);
 	const touchIsDown = useStore(state => state.touchIsDown);
 	const mouseIsDown = useStore(state => state.mouseIsDown);
@@ -336,12 +338,12 @@ const Traveller = () => {
     // Loop through keysDown and update position with inertia
 
 		// Up
-		if(keysDown.w) {
+		if((keysDown.w && invertY) || (keysDown.s && !invertY)) {
 			setPitchInertia(pitchInertia <= -50 ? -50 : pitchInertia - delta * 8);
 		}
 
 		// Down
-		if(keysDown.s) {
+		if((keysDown.w && !invertY) || (keysDown.s && invertY)) {
 			setPitchInertia(pitchInertia >= 50 ? 50 : pitchInertia + delta * 8);
 		}
 
@@ -475,6 +477,7 @@ const App = () => {
         <Beyond />
         <Traveller />
       </Canvas>
+			<Settings />
 			<Controls />
       <LogoMark />
       {/* <Story /> */}

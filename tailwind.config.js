@@ -18,7 +18,7 @@ module.exports = {
     extend: {
 			colors: {
 				'spaceship-black': '#201112',
-				'sky-pink': '#EE848D',
+				'cloud-pink': '#EE848D',
 				'pop-pink': '#ff7f91',
 			}
 		},
