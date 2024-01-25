@@ -4,25 +4,30 @@ export default function Story() {
   const time = useRef(performance.now() / 1000); // in ms
   const prevTime = useRef(time.current / 1000); // in ms
   const delta = useRef(0);
-	const charIndex = useRef(0);
+  const charIndex = useRef(0);
   const storyIndex_ = useRef(0);
 
   const lineTimer = useRef(0);
   const charTimer = useRef(0);
-	const lineElement = useRef(null);
+  const lineElement = useRef(null);
   const [storyIndex, setStoryIndex] = useState(null);
 
-const config = {
-	lineDelay: 5, // in seconds
-	charDelay: 0.05, // in seconds
-	story: [
-		<div>I&rsquo;ve been flying for so long...</div>,
-		<div>I don&rsquo;t know where I am</div>,
-		<div>Or where I&rsquo;m going</div>,
-		<div>Why am I here?</div>,
-		<div>Where is here?</div>,
-	],
-};
+  const config = {
+    lineDelay: 30, // in seconds
+    charDelay: 0.05, // in seconds
+    story: [
+      <div>The French have a saying, "chasser des chimères"</div>,
+      <div>We must be inside some kind of nebula</div>,
+      <div>I've been flying for so long.</div>,
+      <div>Where are we? Something must have happened...</div>,
+      <div>There were voices, but they went quiet a long time ago.</div>,
+      <div>Do you think that could be Earth?</div>,
+      <div>Do you remember the smell of the ocean?</div>,
+      <div>Time feels different here...</div>,
+      <div>What were the clouds like when you were young?</div>,
+      <div>When did you last feel the sun on your skin?</div>,
+    ],
+  };
 
   const [story, setStory] = useState(config.story);
 
@@ -54,21 +59,20 @@ const config = {
 
   // Set current line element
   useLayoutEffect(() => {
-		lineTimer.current = 0; // Reset line timer
-		charIndex.current = 0; // Reset char index
+    lineTimer.current = 0; // Reset line timer
+    charIndex.current = 0; // Reset char index
 
-		if (storyEl.current) {
-			lineElement.current = storyEl.current.querySelector(".is-current-line");
-		}
+    if (storyEl.current) {
+      lineElement.current = storyEl.current.querySelector(".is-current-line");
+    }
 
-		if(lineElement.current) {
-			const span = lineElement.current.querySelectorAll("span");
+    if (lineElement.current) {
+      const span = lineElement.current.querySelectorAll("span");
       span.forEach(el => {
         el.style.visibility = "hidden";
       });
-		}
+    }
   }, [storyIndex]);
-
 
   /**
    * Render loop
@@ -85,19 +89,19 @@ const config = {
       setStoryIndex(storyIndex_.current);
     }
 
-		// Typewriter effect by toggling visibility of spans
+    // Typewriter effect by toggling visibility of spans
     if (charTimer.current >= config.charDelay && lineElement.current) {
       charTimer.current = 0; // Reset char timer
 
-			const span = lineElement.current.querySelectorAll("span");
+      const span = lineElement.current.querySelectorAll("span");
 
-			if (charIndex.current < span.length) {
-				span[charIndex.current].style.visibility = "visible";
-				charIndex.current++;
-			}
+      if (charIndex.current < span.length) {
+        span[charIndex.current].style.visibility = "visible";
+        charIndex.current++;
+      }
     }
 
-		// Update timers
+    // Update timers
     lineTimer.current += delta.current;
     charTimer.current += delta.current;
 

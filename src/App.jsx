@@ -16,23 +16,23 @@ import planetBodyVertexShader from "./shaders/planetBody/vert.glsl";
 import planetBodyFragmentShader from "./shaders/planetBody/frag.glsl";
 import worldVertexShader from "./shaders/world/vert.glsl";
 import worldFragmentShader from "./shaders/world/frag.glsl";
-import Controls from './components/Controls';
-import Settings from './components/Settings';
+import Controls from "./components/Controls";
+import Settings from "./components/Settings";
 
 const disableMotion = false;
 const tQ = new Quaternion();
 
 const WorldMaterial = shaderMaterial(
   {
-		uCapsuleColourFace: null,
+    uCapsuleColourFace: null,
     uCapsuleColourFar: null,
     uCapsuleColourNear: null,
-		uOutsideColour: null,
+    uOutsideColour: null,
     uDepth: 0.0,
     uRadius: 0.0,
     // uTime: 0.0,
     uTime: Math.random() * 999,
-		uTravellerPos: new Vector3(0, 0, 0),
+    uTravellerPos: new Vector3(0, 0, 0),
   },
   worldVertexShader,
   worldFragmentShader
@@ -41,7 +41,7 @@ const WorldMaterial = shaderMaterial(
 extend({ WorldMaterial });
 
 const Capsule = () => {
-	const tPos = useStore(state => state.tPos);
+  const tPos = useStore(state => state.tPos);
   const capsule = useRef();
   const worldMaterial = useRef();
   const radius = 2.0;
@@ -50,10 +50,10 @@ const Capsule = () => {
   const tubularSegments = 96;
 
   const worldConf = useControls("world", {
-		uCapsuleColourFace: "#ffb6bf",
+    uCapsuleColourFace: "#ffb6bf",
     uCapsuleColourFar: "#ff4848",
     uCapsuleColourNear: "#00416f",
-		uOutsideColour: "#160b26",
+    uOutsideColour: "#160b26",
   });
 
   const vertices_ = [];
@@ -64,14 +64,14 @@ const Capsule = () => {
   const debrisOpacity_ = [];
   const debrisShape_ = [];
   const debrisColour_ = [];
-	const debrisSpeed_ = [];
+  const debrisSpeed_ = [];
 
   const debrisAttrs = () => {
     return {
       opacity: Math.random(),
       shape: Math.floor(Math.random() * 4), // 0 - 3
       colour: Math.floor(Math.random() * 3), // 0 - 2
-			speed: Math.random() * 4 + 1, // 1.0 - 5.0
+      speed: Math.random() * 4 + 1, // 1.0 - 5.0
     };
   };
 
@@ -95,7 +95,7 @@ const Capsule = () => {
       debrisOpacity_.push(0);
       debrisShape_.push(0);
       debrisColour_.push(0);
-			debrisSpeed_.push(0);
+      debrisSpeed_.push(0);
 
       const normal = new Vector3(x, y, 0.0).normalize().multiplyScalar(-1);
       normals_.push(normal.x, normal.y, normal.z);
@@ -146,35 +146,30 @@ const Capsule = () => {
     const planeNormals = plane.attributes.normal.array;
     const planeUvs = plane.attributes.uv.array;
 
-		// Transform planeVertices to position 
-		for (let i = 0; i < planeVertices.length; i += 3) {
-			planeVertices[i] += position.x;
-			planeVertices[i + 1] += position.y;
-			planeVertices[i + 2] += position.z;
-		}
+    // Transform planeVertices to position
+    for (let i = 0; i < planeVertices.length; i += 3) {
+      planeVertices[i] += position.x;
+      planeVertices[i + 1] += position.y;
+      planeVertices[i + 2] += position.z;
+    }
 
-		// Get debris attributes with random values
-		const { 
-			opacity: dOpacity, 
-			shape: dShape, 
-			colour: dColour,
-			speed: dSpeed,
-		} = debrisAttrs();
+    // Get debris attributes with random values
+    const { opacity: dOpacity, shape: dShape, colour: dColour, speed: dSpeed } = debrisAttrs();
 
-		// console.log('dOpacity', dOpacity);
-		// console.log('dShape', dShape);
-		// console.log('dColour', dColour);
-		// console.log('dSpeed', dSpeed);
-		
+    // console.log('dOpacity', dOpacity);
+    // console.log('dShape', dShape);
+    // console.log('dColour', dColour);
+    // console.log('dSpeed', dSpeed);
+
     // Fill levels and debris attributes
     const planeLevels = [];
     for (let i = 0; i < planeVertices.length; i++) {
       planeLevels.push(1, 0, 0);
-			
-			debrisOpacity_.push(dOpacity);
-			debrisShape_.push(dShape);
-			debrisColour_.push(dColour);
-			debrisSpeed_.push(dSpeed);
+
+      debrisOpacity_.push(dOpacity);
+      debrisShape_.push(dShape);
+      debrisColour_.push(dColour);
+      debrisSpeed_.push(dSpeed);
     }
 
     // Generate plane indices from position array
@@ -188,7 +183,6 @@ const Capsule = () => {
     levels_.push(...planeLevels);
     uvs_.push(...planeUvs);
     indices_.push(...planeIndices);
-
   };
 
   // Generate the capsule [the hard way :D]
@@ -202,37 +196,37 @@ const Capsule = () => {
       generateTubeSegment(i, radius, [0, 0, 0]);
     }
 
-		// Duplicate the first segment of vertices to create a flat top
-		const firstSegment = vertices_.slice(0, radialSegments * 3);
-		vertices_.push(...firstSegment);
+    // Duplicate the first segment of vertices to create a flat top
+    const firstSegment = vertices_.slice(0, radialSegments * 3);
+    vertices_.push(...firstSegment);
 
-		// Duplicate the first segment of normals to create a flat top
-		const firstSegmentNormals = normals_.slice(0, radialSegments * 3);
-		normals_.push(...firstSegmentNormals);
+    // Duplicate the first segment of normals to create a flat top
+    const firstSegmentNormals = normals_.slice(0, radialSegments * 3);
+    normals_.push(...firstSegmentNormals);
 
-		for(let i = 0; i < firstSegment.length / 3; i++) {
-			uvs_.push(1, 1);
-			levels_.push(0, 0, 0);
-			debrisOpacity_.push(0);
-			debrisShape_.push(0);
-			debrisColour_.push(0);
-			debrisSpeed_.push(0);
-		}
+    for (let i = 0; i < firstSegment.length / 3; i++) {
+      uvs_.push(1, 1);
+      levels_.push(0, 0, 0);
+      debrisOpacity_.push(0);
+      debrisShape_.push(0);
+      debrisColour_.push(0);
+      debrisSpeed_.push(0);
+    }
 
     // Generate UVs
     generateTubeUVs();
-		
+
     // Generate indices
     generateTubeIndices(0);
 
-		// Generate the top indices
-		const topIndices = [];
-		for (let i = 0; i < radialSegments - 2; i++) {
-			topIndices.push(0);
-			topIndices.push(i + 1);
-			topIndices.push(i + 2);
-		}
-		indices_.push(...topIndices);
+    // Generate the top indices
+    const topIndices = [];
+    for (let i = 0; i < radialSegments - 2; i++) {
+      topIndices.push(0);
+      topIndices.push(i + 1);
+      topIndices.push(i + 2);
+    }
+    indices_.push(...topIndices);
 
     /**
      * SECOND PASS : Cloud layer
@@ -253,10 +247,10 @@ const Capsule = () => {
      * THIRD PASS : Debris layer
      */
 
-		// Smol planes
-		for(let i = 0; i < 20; i++) {
-			generatePlane(.1, .1, new Vector3(Math.random() * 4 - 2, Math.random() * 4 - 2, Math.random() * depth - depth * 0.5));
-		}
+    // Smol planes
+    for (let i = 0; i < 20; i++) {
+      generatePlane(0.1, 0.1, new Vector3(Math.random() * 4 - 2, Math.random() * 4 - 2, Math.random() * depth - depth * 0.5));
+    }
 
     const vertices = new Float32Array(vertices_);
     const normals = new Float32Array(normals_);
@@ -266,25 +260,25 @@ const Capsule = () => {
     const debrisOpacity = new Float32Array(debrisOpacity_);
     const debrisShape = new Float32Array(debrisShape_);
     const debrisColour = new Float32Array(debrisColour_);
-		const debrisSpeed = new Float32Array(debrisSpeed_);
+    const debrisSpeed = new Float32Array(debrisSpeed_);
 
     return { vertices, normals, levels, uvs, indices, debrisOpacity, debrisShape, debrisColour, debrisSpeed };
   }, [radialSegments, tubularSegments]);
 
-	// console.log('vertices', vertices.length);
-	// console.log('normals', normals.length);
-	// console.log('levels', levels.length);
-	// console.log('uvs', uvs.length);
-	// console.log('indices', indices.length);
-	// console.log('debrisOpacity', debrisOpacity.length);
-	// console.log('debrisShape', debrisShape.length);
-	// console.log('debrisColour', debrisColour.length);
+  // console.log('vertices', vertices.length);
+  // console.log('normals', normals.length);
+  // console.log('levels', levels.length);
+  // console.log('uvs', uvs.length);
+  // console.log('indices', indices.length);
+  // console.log('debrisOpacity', debrisOpacity.length);
+  // console.log('debrisShape', debrisShape.length);
+  // console.log('debrisColour', debrisColour.length);
 
   useFrame((_, delta) => {
     worldMaterial.current.uniforms.uTime.value += delta * (disableMotion ? 0 : 1);
-		worldMaterial.current.uniforms.uTravellerPos.value = tPos;
+    worldMaterial.current.uniforms.uTravellerPos.value = tPos;
     capsule.current.rotation.z = Math.PI * 0.5 + Math.sin(_.clock.elapsedTime * 0.001) * Math.PI * (disableMotion ? 0 : 0.1);
-	});
+  });
 
   return (
     <>
@@ -303,10 +297,10 @@ const Capsule = () => {
         <worldMaterial
           ref={worldMaterial}
           transparent
-					uCapsuleColourFace={new Color(worldConf.uCapsuleColourFace)}
+          uCapsuleColourFace={new Color(worldConf.uCapsuleColourFace)}
           uCapsuleColourFar={new Color(worldConf.uCapsuleColourFar)}
           uCapsuleColourNear={new Color(worldConf.uCapsuleColourNear)}
-					uOutsideColour={new Color(worldConf.uOutsideColour)}
+          uOutsideColour={new Color(worldConf.uOutsideColour)}
           uDepth={depth}
           uRadius={radius}
           // wireframe
@@ -318,18 +312,23 @@ const Capsule = () => {
 
 const Traveller = () => {
   const t = useRef();
-	const invertY = useStore(state => state.invertY);
-	const keysDown = useStore(state => state.keysDown);
-	const touchIsDown = useStore(state => state.touchIsDown);
-	const mouseIsDown = useStore(state => state.mouseIsDown);
-	const pitchInertia = useStore(state => state.pitchInertia);
-	const setPitchInertia = useStore(state => state.setPitchInertia);
-	const rollInertia = useStore(state => state.rollInertia);
-	const setRollInertia = useStore(state => state.setRollInertia);
-	const yawInertia = useStore(state => state.yawInertia);
-	const setYawInertia = useStore(state => state.setYawInertia);
-	const tPos = useStore(state => state.tPos);
-	const setTPos = useStore(state => state.setTPos);
+  const invertY = useStore(state => state.invertY);
+  const keysDown = useStore(state => state.keysDown);
+  const touchIsDown = useStore(state => state.touchIsDown);
+  const mouseIsDown = useStore(state => state.mouseIsDown);
+  const pitchInertia = useStore(state => state.pitchInertia);
+  const setPitchInertia = useStore(state => state.setPitchInertia);
+  const rollInertia = useStore(state => state.rollInertia);
+  const setRollInertia = useStore(state => state.setRollInertia);
+  const yawInertia = useStore(state => state.yawInertia);
+  const setYawInertia = useStore(state => state.setYawInertia);
+  const tPos = useStore(state => state.tPos);
+  const setTPos = useStore(state => state.setTPos);
+
+  const boundsTop = 4;
+  const boundsBottom = -2.5;
+  const boundsLeft = -4;
+  const boundsRight = 4;
 
   useFrame((_, delta) => {
     // Clamp delta
@@ -337,35 +336,35 @@ const Traveller = () => {
 
     // Loop through keysDown and update position with inertia
 
-		// Up
-		if((keysDown.w && invertY) || (keysDown.s && !invertY)) {
-			setPitchInertia(pitchInertia <= -50 ? -50 : pitchInertia - delta * 8);
-		}
+    // Up
+    if ((keysDown.w && invertY) || (keysDown.s && !invertY)) {
+      setPitchInertia(pitchInertia <= -50 ? -50 : pitchInertia - delta * 8);
+    }
 
-		// Down
-		if((keysDown.w && !invertY) || (keysDown.s && invertY)) {
-			setPitchInertia(pitchInertia >= 50 ? 50 : pitchInertia + delta * 8);
-		}
+    // Down
+    if ((keysDown.w && !invertY) || (keysDown.s && invertY)) {
+      setPitchInertia(pitchInertia >= 50 ? 50 : pitchInertia + delta * 8);
+    }
 
-		// Left
-		if(keysDown.a) {
-			setRollInertia(rollInertia >= 35 ? 35 : rollInertia + delta * 80);
-			setYawInertia(yawInertia >= 35 ? 35 : yawInertia + delta * 80);
-		}
+    // Left
+    if (keysDown.a) {
+      setRollInertia(rollInertia >= 35 ? 35 : rollInertia + delta * 80);
+      setYawInertia(yawInertia >= 35 ? 35 : yawInertia + delta * 80);
+    }
 
-		// Right
-		if(keysDown.d) {
-			setRollInertia(rollInertia <= -35 ? -35 : rollInertia - delta * 80);
-			setYawInertia(yawInertia <= -35 ? -35 : yawInertia - delta * 80);
-		}
+    // Right
+    if (keysDown.d) {
+      setRollInertia(rollInertia <= -35 ? -35 : rollInertia - delta * 80);
+      setYawInertia(yawInertia <= -35 ? -35 : yawInertia - delta * 80);
+    }
 
     // Self-righting
-		if (!keysDown.w && !keysDown.s && !mouseIsDown && !touchIsDown) {
+    if (!keysDown.w && !keysDown.s && !mouseIsDown && !touchIsDown) {
       setPitchInertia(MathUtils.lerp(pitchInertia, 0, delta * 1.1));
       t.current.rotation.x = MathUtils.lerp(t.current.rotation.x, 0, delta * 1.1);
     }
 
-		if (!keysDown.a && !keysDown.d && !mouseIsDown && !touchIsDown) {
+    if (!keysDown.a && !keysDown.d && !mouseIsDown && !touchIsDown) {
       setRollInertia(MathUtils.lerp(rollInertia, 0, delta * 1.1));
       setYawInertia(MathUtils.lerp(yawInertia, 0, delta * 1.1));
       t.current.rotation.z = MathUtils.lerp(t.current.rotation.z, 0, delta * 1.1);
@@ -379,6 +378,23 @@ const Traveller = () => {
     // Update position
     t.current.position.y += t.current.rotation.x * delta * 2.4;
     t.current.position.x -= t.current.rotation.z * delta * 1.5;
+
+    // Test if traveller is outside the viewport and reset position
+    if (t.current.position.y > boundsTop) {
+      t.current.position.y = boundsTop;
+    }
+
+    if (t.current.position.y < boundsBottom) {
+      t.current.position.y = boundsBottom;
+    }
+
+    if (t.current.position.x > boundsRight) {
+      t.current.position.x = boundsRight;
+    }
+
+    if (t.current.position.x < boundsLeft) {
+      t.current.position.x = boundsLeft;
+    }
 
     // Move forwards and backwards automatically
     // t.current.position.z += Math.sin(state.clock.elapsedTime * 0.5) * delta * .1;
@@ -398,60 +414,56 @@ const Traveller = () => {
     // fwd/bwd
     // t.current.position.z += t.current.rotation.x * delta_ * 0.6;
 
-		// Update traveller position
-		setTPos(tPos.setFromMatrixPosition(t.current.matrixWorld));
+    // Update traveller position
+    setTPos(tPos.setFromMatrixPosition(t.current.matrixWorld));
   });
 
   return <Model ref={t} scale={[0.05, 0.05, 0.05]} position={[0.5, -0.2, 2]} />;
 };
 
 const Beyond = props => {
-	const outside = useRef();
+  const outside = useRef();
   const planetBody = useRef();
 
-	const OutsideMaterial = new shaderMaterial(
-		{
-			uBaseColour: null,
-			uColor1: null,
-			uColor2: null,
-			uTime: Math.random() * 999,
-		},
-		outsideVertexShader,
-		outsideFragmentShader
-	);
+  const OutsideMaterial = new shaderMaterial(
+    {
+      uBaseColour: null,
+      uColor1: null,
+      uColor2: null,
+      uTime: Math.random() * 999,
+    },
+    outsideVertexShader,
+    outsideFragmentShader
+  );
 
-	extend({ OutsideMaterial });
+  extend({ OutsideMaterial });
 
   useFrame((_, delta) => {
-		outside.current.material.uniforms.uTime.value += delta;
+    outside.current.material.uniforms.uTime.value += delta;
     planetBody.current.material.uniforms.uTime.value += delta;
   });
 
-	const outsideConf = useControls("outside", {
-		sphereScale: 5,
-		sphereBaseColour: "black",
-		sphereColour1: "orange",
-		sphereColour2: "cyan",
-	});
+  const outsideConf = useControls("outside", {
+    sphereScale: 5,
+    sphereBaseColour: "black",
+    sphereColour1: "orange",
+    sphereColour2: "cyan",
+  });
 
   return (
     <>
-			<mesh 
-				position={[0, 1, 0]}
-				ref={outside} 
-				scale={[outsideConf.sphereScale, outsideConf.sphereScale, outsideConf.sphereScale]}
-			>
-				<sphereGeometry args={[1, 32, 32]} />
-				<outsideMaterial
-					uBaseColour={new Color(outsideConf.sphereBaseColour)}
-					uColor1={new Color(outsideConf.sphereColour1)}
-					uColor2={new Color(outsideConf.sphereColour2)}
-					side={BackSide}
-					transparent
-					// wireframe
-				/>
-			</mesh>
-      <mesh ref={planetBody} scale={[.5, .5, .5]} position={[-.8, 1.5, -3.499]}>
+      <mesh position={[0, 1, 0]} ref={outside} scale={[outsideConf.sphereScale, outsideConf.sphereScale, outsideConf.sphereScale]}>
+        <sphereGeometry args={[1, 32, 32]} />
+        <outsideMaterial
+          uBaseColour={new Color(outsideConf.sphereBaseColour)}
+          uColor1={new Color(outsideConf.sphereColour1)}
+          uColor2={new Color(outsideConf.sphereColour2)}
+          side={BackSide}
+          transparent
+          // wireframe
+        />
+      </mesh>
+      <mesh ref={planetBody} scale={[0.5, 0.5, 0.5]} position={[-0.8, 1.5, -3.499]}>
         <sphereGeometry args={[1, 32, 32]} />
         <shaderMaterial
           uniforms={{
@@ -478,9 +490,9 @@ const App = () => {
         <Traveller />
       </Canvas>
       <LogoMark />
-			<Settings />
-			<Controls />
-      {/* <Story /> */}
+      <Settings />
+      <Controls />
+      <Story />
     </>
   );
 };
