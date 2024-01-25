@@ -2,22 +2,30 @@
 @tailwind components;
 @tailwind utilities;
 
+@font-face {
+	font-family: "ballingermono";
+	font-style: normal;
+	font-weight: 400;
+	font-display: swap;
+	src: url("/fonts/ballinger-mono/ballingermono-regular.woff2") format("woff2"),
+		url("/fonts/ballinger-mono/ballingermono-regular.woff") format("woff");
+}
+
+@font-face {
+	font-family: "ballingermono";
+	font-style: normal;
+	font-weight: 700;
+	font-display: swap;
+	src: url("/fonts/ballinger-mono/ballingermono-bold.woff2") format("woff2"),
+		url("/fonts/ballinger-mono/ballingermono-bold.woff") format("woff");
+}
+
 html,
 body,
 #root {
-  width: 100%;
-  height: 100%;
-  margin: 0;
-  padding: 0;
+	@apply w-full h-full select-none overflow-hidden;
   background-color: #160b26;
-  /* background-color: #ff7f91; */
   -webkit-touch-callout: none;
-  -webkit-user-select: none;
-  -khtml-user-select: none;
-  -moz-user-select: none;
-  -ms-user-select: none;
-  user-select: none;
-  overflow: hidden;
 }
 
 #root {
@@ -25,12 +33,7 @@ body,
 }
 
 body {
-  position: fixed;
-  overflow: hidden;
-  overscroll-behavior-y: none;
-  font-family: helvetica neue, helvetica, arial, sans-serif;
-  color: black;
-  -webkit-font-smoothing: antialiased;
+	@apply fixed font-mono overflow-hidden overscroll-y-none antialiased;
 }
 
 .logomark {

@@ -12,17 +12,17 @@ export default function Story() {
 	const lineElement = useRef(null);
   const [storyIndex, setStoryIndex] = useState(null);
 
-  const config = {
-    lineDelay: 5, // in seconds
-    charDelay: 0.05, // in seconds
-    story: [
-      <div>I've been flying for so long</div>,
-      <div>I don't know where I am</div>,
-      <div>Or where I'm going</div>,
-      <div>Why am I here?</div>,
-      <div>Where is here?</div>,
-    ],
-  };
+const config = {
+	lineDelay: 5, // in seconds
+	charDelay: 0.05, // in seconds
+	story: [
+		<div>I&rsquo;ve been flying for so long...</div>,
+		<div>I don&rsquo;t know where I am</div>,
+		<div>Or where I&rsquo;m going</div>,
+		<div>Why am I here?</div>,
+		<div>Where is here?</div>,
+	],
+};
 
   const [story, setStory] = useState(config.story);
 
@@ -107,7 +107,7 @@ export default function Story() {
 
   return (
     <div className='absolute inset-0 flex items-end justify-center text-center pointer-events-none'>
-      <div ref={storyEl} className='flex gap-x-1 font-mono text-white pb-16 opacity-70 leading-normal'>
+      <div ref={storyEl} className='flex gap-x-1 font-mono font-bold text-white pb-16 leading-normal'>
         {story.map((line, i) => (
           <div key={i} className={storyIndex === i ? "block is-current-line" : "hidden"}>
             {line}

@@ -12,7 +12,16 @@ module.exports = {
 				'100%': { opacity: 0 },
 			},
 		},
-    extend: {},
+		fontFamily: {
+			'mono': ['ballingermono'],
+		},
+    extend: {
+			colors: {
+				'spaceship-black': '#201112',
+				'sky-pink': '#EE848D',
+				'pop-pink': '#ff7f91',
+			}
+		},
   },
   plugins: [],
 }
