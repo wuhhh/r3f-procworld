@@ -36,8 +36,6 @@ export default function Story() {
   cursor.className = "ignore animate-blink";
   cursor.innerHTML = "&#9612;";
 
-  console.log(cursor);
-
   /**
    * Wrap characters in spans
    */
@@ -62,9 +60,7 @@ export default function Story() {
     wrapCharacters();
     setStoryIndex(Math.floor(Math.random() * story.length));
     storyIndex_.current = storyIndex;
-    setTimeout(() => {
-      render();
-    }, 0);
+    render();
   }, []);
 
   // Set current line element
@@ -136,7 +132,6 @@ export default function Story() {
         {story.map((line, i) => (
           <div key={i} className={storyIndex === i ? "block is-current-line" : "hidden"}>
             <span>{line}</span>
-            {/* <span className='animate-blink'>&#9612;</span> */}
           </div>
         ))}
       </div>
