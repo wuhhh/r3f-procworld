@@ -491,9 +491,9 @@ const App = () => {
         <Traveller />
       </Canvas>
       <LogoMark />
+      <Story />
       <Settings />
       <Controls />
-      <Story />
       <Loader />
     </>
   );
