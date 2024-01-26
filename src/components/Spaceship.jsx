@@ -48,8 +48,8 @@ export const Model = forwardRef((props, ref) => {
   );
 });
 
-useTexture.preload("/textures/spaceship-baked-sunlight.png");
-// useTexture.preload('/textures/spaceship-baked.png')
+// useTexture.preload("/textures/spaceship-baked-sunlight.png");
+useTexture.preload("/textures/spaceship-baked.png");
 useGLTF.preload("/models/spaceship-d4-joined-transformed.glb");
 
 export default Model;
