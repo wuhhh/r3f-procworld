@@ -6,6 +6,8 @@ import CheckboxSetting from "./CheckboxSetting";
 
 export default function Settings(props) {
   const [showSettings, setShowSettings] = useState(false);
+  const hideStory = useStore(state => state.hideStory);
+  const toggleHideStory = useStore(state => state.toggleHideStory);
   const muted = useStore(state => state.muted);
   const toggleMuted = useStore(state => state.toggleMuted);
   const invertY = useStore(state => state.invertY);
@@ -73,8 +75,25 @@ export default function Settings(props) {
             label='Invert'
           />
         </div>
+        {/* <div className='mb-3'>
+          <CheckboxSetting
+            name='mute'
+            id='mute'
+            checked={muted}
+            tabIndex={!showSettings ? -1 : 0}
+            onChange={toggleMuted}
+            label='Mute audio'
+          />
+        </div> */}
         <div>
-          <CheckboxSetting name='mute' id='mute' checked={muted} tabIndex={!showSettings ? -1 : 0} onChange={toggleMuted} label='Mute' />
+          <CheckboxSetting
+            name='hide-story'
+            id='hide-story'
+            checked={hideStory}
+            tabIndex={!showSettings ? -1 : 0}
+            onChange={toggleHideStory}
+            label='Hide story'
+          />
         </div>
         <div className='h-10'></div>
         <h2 className='settings__heading'>Keyboard Controls</h2>

@@ -9,48 +9,54 @@ const getLocalStorageValue = (key, defaultValue) => {
 };
 
 export default create(
-	subscribeWithSelector(
-		(set, get) => ({
-			// General
-			mouseIsDown: false,
-			setMouseIsDown: (value) => set((state) => ({ mouseIsDown: value })),
-			touchIsDown: false,
-			setTouchIsDown: (value) => set((state) => ({ touchIsDown: value })),
+  subscribeWithSelector((set, get) => ({
+    // General
+    mouseIsDown: false,
+    setMouseIsDown: value => set(state => ({ mouseIsDown: value })),
+    touchIsDown: false,
+    setTouchIsDown: value => set(state => ({ touchIsDown: value })),
 
-			// Settings
-			invertY: getLocalStorageValue("invertY", false),
-      toggleInvertY: () => {
-        set((state) => {
-          const newInvertY = !state.invertY;
-          localStorage.setItem("invertY", JSON.stringify(newInvertY));
-          return { invertY: newInvertY };
-        });
-      },
-			muted: getLocalStorageValue("muted", false),
-			toggleMuted: () => {
-        set((state) => {
-          const newMuted = !state.muted;
-          localStorage.setItem("muted", JSON.stringify(newMuted));
-          return { muted: newMuted };
-        });
-      },
+    // Settings
+    hideStory: getLocalStorageValue("hideStory", false),
+    toggleHideStory: () => {
+      set(state => {
+        const newHideStory = !state.hideStory;
+        localStorage.setItem("hideStory", JSON.stringify(newHideStory));
+        return { hideStory: newHideStory };
+      });
+    },
+    invertY: getLocalStorageValue("invertY", false),
+    toggleInvertY: () => {
+      set(state => {
+        const newInvertY = !state.invertY;
+        localStorage.setItem("invertY", JSON.stringify(newInvertY));
+        return { invertY: newInvertY };
+      });
+    },
+    muted: getLocalStorageValue("muted", false),
+    toggleMuted: () => {
+      set(state => {
+        const newMuted = !state.muted;
+        localStorage.setItem("muted", JSON.stringify(newMuted));
+        return { muted: newMuted };
+      });
+    },
 
-			// Traveller
-			keysDown: {
-				w: false,
-				a: false,
-				s: false,
-				d: false,
-			},
-			setKeyDown: (key, value) => set((state) => ({ keysDown: { ...state.keysDown, [key]: value } })),
-			pitchInertia: 0,
-			setPitchInertia: (value) => set((state) => ({ pitchInertia: value })),
-			rollInertia: 0,
-			setRollInertia: (value) => set((state) => ({ rollInertia: value })),
-			yawInertia: 0,
-			setYawInertia: (value) => set((state) => ({ yawInertia: value })),
-			tPos: new Vector3(),
-			setTPos: (value) => set((state) => ({ tPos: value })),
-		})
-	)
+    // Traveller
+    keysDown: {
+      w: false,
+      a: false,
+      s: false,
+      d: false,
+    },
+    setKeyDown: (key, value) => set(state => ({ keysDown: { ...state.keysDown, [key]: value } })),
+    pitchInertia: 0,
+    setPitchInertia: value => set(state => ({ pitchInertia: value })),
+    rollInertia: 0,
+    setRollInertia: value => set(state => ({ rollInertia: value })),
+    yawInertia: 0,
+    setYawInertia: value => set(state => ({ yawInertia: value })),
+    tPos: new Vector3(),
+    setTPos: value => set(state => ({ tPos: value })),
+  }))
 );

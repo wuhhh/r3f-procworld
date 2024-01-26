@@ -4,6 +4,7 @@ import { Float, PerspectiveCamera, shaderMaterial } from "@react-three/drei";
 import { BackSide, Color, Euler, MathUtils, PlaneGeometry, Quaternion, Vector3 } from "three";
 import { Leva, useControls } from "leva";
 
+import { Loader } from "./components/Loader";
 import LogoMark from "./components/LogoMark";
 import { Model } from "./components/Spaceship";
 import Story from "./components/Story";
@@ -493,6 +494,7 @@ const App = () => {
       <Settings />
       <Controls />
       <Story />
+      <Loader />
     </>
   );
 };

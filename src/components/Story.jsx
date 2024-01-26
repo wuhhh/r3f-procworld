@@ -1,16 +1,19 @@
 import { useEffect, useLayoutEffect, useRef, useState } from "react";
+import useStore from "../stores/useStore";
 
 export default function Story() {
+  const hideStory = useStore(state => state.hideStory);
+
   const config = {
     lineDelay: 30, // in seconds
     charDelayMin: 0.05, // in seconds
     charDelayMax: 1, // in seconds
     story: [
       <>Where are we?</>,
-      <>We must be inside some kind of nebula</>,
+      <>Is that a mirage?</>,
       <>I've been flying for so long.</>,
-      <>Where are we? Something must have happened...</>,
-      <>It's been so long since we lost contact</>,
+      <>Something monumental must have happened...</>,
+      <>It's been hours since we lost contact</>,
       <>Do you think that could be Earth?</>,
       <>Do you remember the smell of the ocean?</>,
       <>Time feels different here...</>,
@@ -127,13 +130,15 @@ export default function Story() {
   };
 
   return (
-    <div className='absolute inset-0 flex items-end justify-center text-center pointer-events-none'>
-      <div ref={storyEl} className='story-line'>
-        {story.map((line, i) => (
-          <div key={i} className={storyIndex === i ? "block is-current-line" : "hidden"}>
-            <span>{line}</span>
-          </div>
-        ))}
+    <div className={`transition-opacity duration-500 ease-in-out ${hideStory ? "opacity-0" : "opacity-100"}`}>
+      <div className='absolute inset-0 flex items-end justify-center text-center pointer-events-none'>
+        <div ref={storyEl} className='story-line'>
+          {story.map((line, i) => (
+            <div key={i} className={storyIndex === i ? "block is-current-line" : "hidden"}>
+              <span>{line}</span>
+            </div>
+          ))}
+        </div>
       </div>
     </div>
   );
