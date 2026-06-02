@@ -12,8 +12,8 @@ import boostEmissionFragmentShader from "../shaders/boostEmission/frag.glsl";
 import { useFrame } from "@react-three/fiber";
 
 export const Model = forwardRef((props, ref) => {
-  const { nodes } = useGLTF("/models/spaceship-d4-joined-transformed.glb");
-  const bakedTexture = useTexture("/textures/spaceship-baked.png");
+  const { nodes } = useGLTF("/cloudrift/models/spaceship-d4-joined-transformed.glb");
+  const bakedTexture = useTexture("/cloudrift/textures/spaceship-baked.png");
   const bakedMaterial = new MeshBasicMaterial({ map: bakedTexture });
 
   bakedTexture.flipY = false;
@@ -48,8 +48,8 @@ export const Model = forwardRef((props, ref) => {
   );
 });
 
-// useTexture.preload("/textures/spaceship-baked-sunlight.png");
-useTexture.preload("/textures/spaceship-baked.png");
-useGLTF.preload("/models/spaceship-d4-joined-transformed.glb");
+// useTexture.preload("/cloudrift/textures/spaceship-baked-sunlight.png");
+useTexture.preload("/cloudrift/textures/spaceship-baked.png");
+useGLTF.preload("/cloudrift/models/spaceship-d4-joined-transformed.glb");
 
 export default Model;
